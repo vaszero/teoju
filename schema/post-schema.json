@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TeojuTistoryPost",
+  "description": "터주농산 티스토리 포스팅 빌더가 사용하는 입력 스키마. 사진 -> 스토리 -> 제품 소개 -> 후기/인증 -> 상세정보 -> 구매유도 순서로 HTML을 조립한다.",
+  "type": "object",
+  "required": ["category", "productName", "keyword"],
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": ["chip", "juice", "herb", "gift", "custom"],
+      "description": "대추칩 / 대추씨즙 / 건나물 / 명절 선물세트 / 기타. 선택 시 예시 문구(preset)가 채워진다."
+    },
+    "productName": { "type": "string", "description": "제품명. 제목과 '제품 특징' 섹션 제목에 사용." },
+    "keyword": { "type": "string", "description": "대표 SEO 키워드. 제목 앞부분에 배치." },
+    "hook": { "type": "string", "description": "한 줄 후킹 문구(부제). 제목에 결합." },
+    "heroImageUrl": { "type": "string", "description": "신뢰를 주는 대표 사진 URL. 비어 있으면 사진 삽입 안내 placeholder를 출력." },
+    "heroCaption": { "type": "string", "description": "대표 사진 캡션." },
+    "storySeed": { "type": "string", "description": "실제 브랜드 스토리 원문(사실만 입력, 자동으로 지어내지 않음)." },
+    "heritage": {
+      "type": "array",
+      "description": "스토리에 이어붙일 이력 태그. HERITAGE_LIB(예: 26년 업력, 청와대 납품, 산림조합, 판매왕, 산지 직접 검수, 가업 승계)에서 선택.",
+      "items": { "type": "string" }
+    },
+    "features": { "type": "string", "description": "제품 특징. 줄바꿈으로 구분된 목록 -> <ul><li>." },
+    "proof": { "type": "string", "description": "후기/인증 근거. 줄바꿈으로 구분된 목록 -> 배지형 리스트." },
+    "usage": { "type": "string", "description": "섭취/보관 방법. 줄바꿈으로 구분된 문단." },
+    "caution": { "type": "string", "description": "주의사항. 있을 때만 경고 박스로 출력." },
+    "ctaText": { "type": "string", "description": "구매 유도 버튼 문구." },
+    "storeUrl": { "type": "string", "description": "스마트스토어/쿠팡 등 구매 링크. 없으면 버튼을 링크 없는 배지로 출력." },
+    "hashtags": { "type": "string", "description": "공백으로 구분된 해시태그." },
+    "metaDesc": { "type": "string", "description": "글 본문에는 포함되지 않는 검색 요약(메타 설명). 별도로 복사해서 사용." }
+  }
+}

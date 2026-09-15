@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>터주 포스팅 빌더</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@500;700;900&display=swap">
+<style>
+  :root{
+    color-scheme: light dark;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+
+    --bg: #f5f6ee;
+    --surface: #ffffff;
+    --surface-alt: #eef3e6;
+    --ink: #1e2a1d;
+    --ink-soft: #5b6b57;
+    --accent: #2f6b3c;
+    --accent-strong: #204a29;
+    --accent-soft: #e3eedd;
+    --gold: #a5761f;
+    --gold-soft: #f8eed7;
+    --line: #dbe3d1;
+    --warn-ink: #7a5a06;
+    --warn-bg: #fbf1d9;
+    --shadow: 0 1px 2px rgba(30,42,29,0.04), 0 10px 24px -14px rgba(30,42,29,0.20);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #10150e;
+      --surface: #1a2116;
+      --surface-alt: #1f2a19;
+      --ink: #eaf0e4;
+      --ink-soft: #a7b69c;
+      --accent: #74c479;
+      --accent-strong: #9ade9e;
+      --accent-soft: #223420;
+      --gold: #dcb35c;
+      --gold-soft: #2b2312;
+      --line: #33402c;
+      --warn-ink: #e6cb84;
+      --warn-bg: #2b2412;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 10px 24px -14px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #10150e;
+    --surface: #1a2116;
+    --surface-alt: #1f2a19;
+    --ink: #eaf0e4;
+    --ink-soft: #a7b69c;
+    --accent: #74c479;
+    --accent-strong: #9ade9e;
+    --accent-soft: #223420;
+    --gold: #dcb35c;
+    --gold-soft: #2b2312;
+    --line: #33402c;
+    --warn-ink: #e6cb84;
+    --warn-bg: #2b2412;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 10px 24px -14px rgba(0,0,0,0.6);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Noto Sans KR', -apple-system, sans-serif;
+    padding-inline: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  img{max-width:100%;}
+  [hidden]{display:none!important;}
+  h1,h2,h3{text-wrap: balance; font-family:'Noto Serif KR', serif; margin:0;}
+  button{font-family:inherit;}
+  textarea, input, select{
+    font-family:inherit;
+    font-size:14px;
+    color:var(--ink);
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:9px 11px;
+    width:100%;
+  }
+  textarea{resize:vertical; line-height:1.6;}
+  input:focus, select:focus, textarea:focus, button:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  label{font-size:13px; font-weight:700; color:var(--ink); display:block; margin-bottom:6px;}
+  .hint{font-size:12px; color:var(--ink-soft); margin-top:5px; line-height:1.5;}
+
+  .app-shell{max-width:1240px; margin:0 auto; padding-block: 22px 60px;}
+
+  header.top{
+    display:flex; flex-wrap:wrap; gap:14px 28px; align-items:flex-end; justify-content:space-between;
+    padding-bottom:18px; border-bottom:1px solid var(--line); margin-bottom:22px;
+  }
+  .brand-eyebrow{
+    font-size:12px; font-weight:700; letter-spacing:.08em; color:var(--accent); text-transform:uppercase;
+  }
+  header.top h1{font-size:26px; color:var(--accent-strong); margin-top:4px;}
+  header.top p{margin:6px 0 0; color:var(--ink-soft); font-size:14px; max-width:60ch;}
+  .reset-btn{
+    background:transparent; border:1px solid var(--line); color:var(--ink-soft);
+    border-radius:999px; padding:8px 16px; font-size:13px; font-weight:500; cursor:pointer; white-space:nowrap;
+  }
+  .reset-btn:hover{border-color:var(--accent); color:var(--accent-strong);}
+
+  .workspace{
+    display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap:22px; align-items:start;
+  }
+  @media (max-width: 860px){
+    .workspace{grid-template-columns: minmax(0,1fr);}
+  }
+
+  .panel{
+    background:var(--surface); border:1px solid var(--line); border-radius:16px;
+    box-shadow:var(--shadow);
+  }
+  .form-panel{padding:6px 22px 22px;}
+  .field-group{padding:18px 0; border-bottom:1px solid var(--line);}
+  .field-group:last-child{border-bottom:none;}
+  .field-group h2{
+    font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent);
+    font-family:'Noto Sans KR',sans-serif; font-weight:700; margin-bottom:12px;
+  }
+  .field-row{display:flex; flex-direction:column; gap:14px;}
+  .field-cols{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  @media (max-width:520px){.field-cols{grid-template-columns:1fr;}}
+
+  .chip-group{display:flex; flex-wrap:wrap; gap:8px; margin-top:2px;}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:999px;
+    border:1px solid var(--line); font-size:12.5px; cursor:pointer; user-select:none; color:var(--ink-soft);
+    background:var(--surface);
+  }
+  .chip input{position:absolute; opacity:0; width:0; height:0;}
+  .chip.checked{background:var(--accent-soft); border-color:var(--accent); color:var(--accent-strong); font-weight:700;}
+
+  .preview-panel{position:sticky; top:calc(env(safe-area-inset-top,0px) + 16px); display:flex; flex-direction:column; max-height:calc(100vh - 40px);}
+  @media (max-width:860px){.preview-panel{position:static; max-height:none;}}
+
+  .tabs{display:flex; gap:4px; padding:10px 14px 0;}
+  .tab-btn{
+    flex:1; padding:10px 8px; border-radius:10px 10px 0 0; border:1px solid var(--line); border-bottom:none;
+    background:var(--surface-alt); color:var(--ink-soft); font-size:13px; font-weight:700; cursor:pointer;
+  }
+  .tab-btn.active{background:var(--surface); color:var(--accent-strong); border-color:var(--accent);}
+  .tab-body{border-top:1px solid var(--line); padding:16px; display:flex; flex-direction:column; gap:12px; overflow:auto;}
+
+  .copy-row{display:flex; gap:8px;}
+  .copy-btn{
+    background:var(--accent); color:#fff; border:none; border-radius:10px; padding:11px 16px;
+    font-size:14px; font-weight:700; cursor:pointer; flex:1;
+  }
+  .copy-btn:hover{background:var(--accent-strong);}
+  .copy-btn.secondary{background:transparent; color:var(--accent-strong); border:1px solid var(--accent);}
+  .copy-btn.secondary:hover{background:var(--accent-soft);}
+  .copy-status{font-size:12px; color:var(--accent-strong); min-height:16px;}
+
+  iframe#previewFrame{
+    width:100%; height:520px; border:1px solid var(--line); border-radius:10px; background:#fff;
+  }
+  textarea#htmlOut{width:100%; height:420px; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:12px; line-height:1.55;}
+  textarea#metaOut{width:100%; height:90px; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:12px;}
+
+  .todo-panel{margin-top:26px; padding:18px 22px; background:var(--gold-soft); border:1px solid var(--gold); border-radius:14px;}
+  .todo-panel h2{font-size:14px; color:var(--warn-ink); margin-bottom:8px; font-family:'Noto Sans KR',sans-serif;}
+  .todo-panel ul{margin:0; padding-left:20px; color:var(--ink); font-size:13.5px; line-height:1.7;}
+
+  footer.meta-note{margin-top:18px; font-size:12px; color:var(--ink-soft); text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <header class="top">
+    <div>
+      <div class="brand-eyebrow">터주농산 · 티스토리 자동 포스팅 도구</div>
+      <h1>터주 포스팅 빌더</h1>
+      <p>제품 정보를 간단히 적으면, 스토리 → 제품 → 후기·인증 → 상세정보 구조의 티스토리용 HTML 글을 자동으로 완성합니다. 완성된 코드를 티스토리 글쓰기의 &lsquo;HTML&rsquo; 모드에 붙여넣으면 그대로 발행됩니다.</p>
+    </div>
+    <button class="reset-btn" id="resetBtn" type="button">전체 초기화</button>
+  </header>
+
+  <div class="workspace">
+    <!-- FORM -->
+    <div class="panel form-panel">
+
+      <div class="field-group">
+        <h2>1. 기본 정보</h2>
+        <div class="field-row">
+          <div>
+            <label for="category">상품 카테고리</label>
+            <select id="category">
+              <option value="chip">대추칩</option>
+              <option value="juice">대추씨즙</option>
+              <option value="herb">국산 건나물</option>
+              <option value="gift">명절 선물세트</option>
+              <option value="custom">기타(직접 입력)</option>
+            </select>
+            <p class="hint">카테고리를 바꾸면 예시 문구가 채워집니다. 필요한 부분만 고쳐 쓰세요.</p>
+          </div>
+          <div class="field-cols">
+            <div>
+              <label for="productName">제품명</label>
+              <input id="productName" type="text" />
+            </div>
+            <div>
+              <label for="keyword">대표 키워드 (SEO)</label>
+              <input id="keyword" type="text" placeholder="예: 대추칩" />
+            </div>
+          </div>
+          <div>
+            <label for="hook">한 줄 후킹 문구 (부제)</label>
+            <input id="hook" type="text" />
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <h2>2. 신뢰를 주는 사진</h2>
+        <div class="field-row">
+          <div class="field-cols">
+            <div>
+              <label for="heroImageUrl">사진 URL (티스토리에 먼저 업로드 후 주소 붙여넣기)</label>
+              <input id="heroImageUrl" type="text" placeholder="비워두면 사진 삽입 자리로 표시됩니다" />
+            </div>
+            <div>
+              <label for="heroCaption">사진 설명 (캡션)</label>
+              <input id="heroCaption" type="text" />
+            </div>
+          </div>
+          <p class="hint">벤치마킹 구조: 사진 한 장으로 먼저 신뢰를 주고 → 스토리 → 제품 소개 → 후기/인증 순으로 이어집니다.</p>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <h2>3. 브랜드 스토리</h2>
+        <div class="field-row">
+          <div>
+            <label for="storySeed">우리 이야기 (한두 문장이면 충분합니다)</label>
+            <textarea id="storySeed" rows="3"></textarea>
+          </div>
+          <div>
+            <label>함께 넣을 이력 (선택한 항목이 스토리 뒤에 문장으로 자동 추가됩니다)</label>
+            <div class="chip-group" id="heritageChips"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <h2>4. 제품 특징</h2>
+        <label for="features">한 줄에 하나씩 적어주세요</label>
+        <textarea id="features" rows="5"></textarea>
+      </div>
+
+      <div class="field-group">
+        <h2>5. 후기 &amp; 인증</h2>
+        <label for="proof">믿을 수 있는 이유 · 후기 · 인증 이력 (한 줄에 하나씩)</label>
+        <textarea id="proof" rows="4"></textarea>
+      </div>
+
+      <div class="field-group">
+        <h2>6. 상세 정보</h2>
+        <div class="field-row">
+          <div>
+            <label for="usage">섭취/보관 방법 (한 줄에 하나씩)</label>
+            <textarea id="usage" rows="3"></textarea>
+          </div>
+          <div>
+            <label for="caution">주의사항 (있을 때만 노출됩니다)</label>
+            <input id="caution" type="text" />
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <h2>7. 구매 유도</h2>
+        <div class="field-cols">
+          <div>
+            <label for="ctaText">버튼 문구</label>
+            <input id="ctaText" type="text" />
+          </div>
+          <div>
+            <label for="storeUrl">스마트스토어 · 쿠팡 링크</label>
+            <input id="storeUrl" type="text" placeholder="https://smartstore.naver.com/..." />
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <h2>8. 태그 &amp; 검색 노출</h2>
+        <div class="field-row">
+          <div>
+            <label for="hashtags">해시태그 (공백으로 구분)</label>
+            <input id="hashtags" type="text" />
+          </div>
+          <div>
+            <label for="metaDesc">네이버·티스토리 요약(메타 설명) — 글 본문에는 들어가지 않고 따로 복사해서 씁니다</label>
+            <textarea id="metaDesc" rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="panel preview-panel">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="preview" type="button">미리보기</button>
+        <button class="tab-btn" data-tab="code" type="button">HTML 코드</button>
+        <button class="tab-btn" data-tab="meta" type="button">메타 설명</button>
+      </div>
+
+      <div class="tab-body" data-panel="preview">
+        <iframe id="previewFrame" title="글 미리보기"></iframe>
+        <div class="copy-row">
+          <button class="copy-btn" id="copyHtmlFromPreview" type="button">티스토리용 HTML 복사</button>
+        </div>
+        <div class="copy-status" id="statusPreview" aria-live="polite"></div>
+      </div>
+
+      <div class="tab-body" data-panel="code" hidden>
+        <textarea id="htmlOut" readonly></textarea>
+        <div class="copy-row">
+          <button class="copy-btn" id="copyHtmlFromCode" type="button">HTML 코드 복사</button>
+        </div>
+        <div class="copy-status" id="statusCode" aria-live="polite"></div>
+      </div>
+
+      <div class="tab-body" data-panel="meta" hidden>
+        <p class="hint" style="margin-top:0;">아래 문구는 글 본문이 아니라 티스토리 &lsquo;글 설명&rsquo;이나 네이버 검색 노출용 요약에 붙여넣는 문구입니다.</p>
+        <textarea id="metaOut" readonly></textarea>
+        <div class="copy-row">
+          <button class="copy-btn secondary" id="copyMeta" type="button">메타 설명 복사</button>
+        </div>
+        <div class="copy-status" id="statusMeta" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="todo-panel">
+    <h2>⚠ 지금 준비해두면 다음 글부터 훨씬 빨라져요</h2>
+    <ul>
+      <li>대추칩 실제 사진, 아이가 간식으로 먹는 영상 캡처본</li>
+      <li>아버지 업력 스토리 — 청와대 납품, 산림조합, 판매왕 등 구체적 이력과 사진 3~4장</li>
+      <li>명절 세트 확정안(품목·그람·시즌) — 확정되면 바로 명절 세트 글을 완성할 수 있어요</li>
+      <li>실제 쿠팡 후기 캡처, 스마트스토어 링크</li>
+      <li>브랜드 리뉴얼 후 확정 초록색 코드(HEX) — 정해지면 이 도구의 색상도 맞춰 드릴게요</li>
+    </ul>
+  </div>
+
+  <footer class="meta-note">이 도구는 입력한 내용을 그대로 정해진 구조(사진 → 스토리 → 제품 → 후기/인증 → 상세정보 → 구매유도)에 넣어 HTML을 만듭니다. 문장은 자동으로 지어내지 않으니, 실제 있었던 이야기와 근거만 적어주세요.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "teoju-posting-builder-v1";
+
+  var FIELD_IDS = ["category","productName","keyword","hook","heroImageUrl","heroCaption",
+    "storySeed","features","proof","usage","caution","ctaText","storeUrl","hashtags","metaDesc"];
+
+  var HERITAGE_LIB = [
+    {id:"years26", label:"26년 도매 업력", text:"터주농산은 26년째 대추와 건나물을 다뤄온 도매업의 노하우를 그대로 잇고 있습니다."},
+    {id:"cheongwadae", label:"청와대 기념품 납품", text:"청와대 기념품으로 납품된 이력이 있을 만큼 품질을 인정받았습니다."},
+    {id:"forest", label:"산림조합 협력", text:"산림조합과 협력하며 원산지 관리 기준을 지켜왔습니다."},
+    {id:"salesking", label:"판매왕 이력", text:"도매 시장에서 판매왕으로 이름을 알린 경험이 있습니다."},
+    {id:"onsite", label:"산지 직접 검수", text:"지금도 산지를 직접 다니며 눈으로 확인하고 고른 것만 들여옵니다."},
+    {id:"succession", label:"가업 승계", text:"이제 그 노하우를 이어받아, 도매를 넘어 생산까지 준비하고 있습니다."}
+  ];
+
+  var PRESETS = {
+    chip: {
+      productName:"국산 대추칩", keyword:"대추칩", hook:"아이 간식으로도 안심하고 건네는 국산 대추칩",
+      heroCaption:"갓 말려 낸 대추칩, 있는 그대로 한 장",
+      storySeed:"26년째 대추를 다묄온 손끝에서 나온 대추칩입니다.",
+      heritage:["years26","onsite","succession"],
+      features:"국산 대추 100%\n설탕·첨가물 없이 얇게 말려 바삭한 식감\n답례품용 프리미엄 포장 가능\n아이 간식, 다과상, 선물용으로 모두 좋음",
+      proof:"실제로 아이가 간식으로 먹는 모습을 영상으로 확인할 수 있어요\n쿠팡 구매 후기에서도 바삭한 식감과 단맛에 대한 평이 많습니다",
+      usage:"밀봉 후 서늘하고 건조한 곳에 보관\n개봉 후에는 냉장 보관 권장\n하루 한 줌(15~20g) 정도가 적당해요",
+      caution:"대추 알레르기가 있다면 섭취 전 확인해 주세요",
+      ctaText:"국산 대추칩 만나보기", storeUrl:"",
+      hashtags:"#대추칩 #국산대추 #건강간식 #답례품추천 #터주농산",
+      metaDesc:"26년 도매 노하우로 고른 국산 대추, 첨가물 없이 얇게 말린 대추칩. 아이 간식과 답례품으로 좋은 이유를 알려드립니다."
+    },
+    juice: {
+      productName:"대추씨즙", keyword:"대추씨즙", hook:"잠들기 전 한 잔, 대추씨로 다린 편안함",
+      heroCaption:"오랜 시간 달여낸 대추씨즙 한 병",
+      storySeed:"대추 속 씨까지 오랜 시간 달여낸 터주농산의 대추씨즙입니다.",
+      heritage:["years26","onsite"],
+      features:"대추씨를 장시간 달여낸 깊은 맛\n첨가물 없이 은은한 단맛\n자기 전 한 잔, 편안한 밤을 위한 습관\n선물용 세트 구성 가능",
+      proof:"산지에서 직접 고른 대추로만 달였습니다\n26년 도매 노하우로 고른 대추를 사용합니다",
+      usage:"하루 1~2회, 따뜻하게 데워 드세요\n개봉 후 냉장 보관, 빠르게 드시는 게 좋아요",
+      caution:"카페인은 없지만 취침 전 과다 섭취는 피해주세요",
+      ctaText:"대추씨즙 자세히 보기", storeUrl:"",
+      hashtags:"#대추씨즙 #수면차 #대추차 #국산대추 #터주농산",
+      metaDesc:"대추씨를 오랜 시간 달여낸 터주농산 대추씨즙. 자기 전 한 잔, 편안한 밤을 위한 이유를 알려드립니다."
+    },
+    herb: {
+      productName:"국산 건나물 세트", keyword:"건나물", hook:"고사리·취나물·곤드레, 산에서 온 그대로",
+      heroCaption:"볕에 잘 말린 국산 건나물",
+      storySeed:"26년 도매 경력으로 산지를 직접 다니며 고른 국산 건나물입니다.",
+      heritage:["years26","forest","onsite"],
+      features:"고사리, 취나물, 곤드레 등 국산 나물 구성\n볕에 잘 말려 향이 살아있음\n명절 상차림, 나물 반찬에 바로 활용",
+      proof:"산림조합과 협력해 원산지를 관리합니다\n도매 시장에서 오랫동안 품질을 인정받았습니다",
+      usage:"찬물에 충분히 불려 삶은 후 조리하세요\n밀봉 후 서늘한 곳에 보관하세요",
+      caution:"품목별로 불리는 시간이 다르니 포장 안내를 확인해주세요",
+      ctaText:"국산 건나물 보러 가기", storeUrl:"",
+      hashtags:"#건나물 #국산나물 #고사리 #취나물 #명절상차림",
+      metaDesc:"26년 도매 경력으로 산지를 직접 다니며 고른 국산 건나물. 고사리, 취나물, 곤드레를 만나보세요."
+    },
+    gift: {
+      productName:"명절 선물세트", keyword:"명절 선물세트", hook:"26년 농산물 도매 노하우를 그대로 담은 명절 세트",
+      heroCaption:"정성껏 포장한 명절 선물세트",
+      storySeed:"터주농산이 26년간 다뤄온 대추와 건나물을 명절 선물세트로 엮었습니다.",
+      heritage:["years26","cheongwadae","forest"],
+      features:"대추칩·대추씨즙·건나물 중 선택 구성\n프리미엄 답례품 포장\n원산지와 생산자 이야기를 담은 카드 동봉",
+      proof:"청와대 기념품 납품, 산림조합 협력 등 26년 업력을 그대로 잇습니다",
+      usage:"세트 구성은 시즌(설·추석·정월대보름)에 맞춰 달라집니다\n품목별 보관방법은 개별 안내를 따라주세요",
+      caution:"품목별 보관방법이 다르니 개별 안내를 확인해주세요",
+      ctaText:"명절 세트 구성 보기", storeUrl:"",
+      hashtags:"#명절선물세트 #추석선물 #설선물 #답례품 #터주농산",
+      metaDesc:"26년 농산물 도매 노하우를 그대로 담은 터주농산 명절 선물세트를 소개합니다."
+    },
+    custom: {
+      productName:"", keyword:"", hook:"", heroCaption:"", storySeed:"", heritage:[],
+      features:"", proof:"", usage:"", caution:"", ctaText:"", storeUrl:"", hashtags:"", metaDesc:""
+    }
+  };
+
+  var els = {};
+  FIELD_IDS.concat(["heroImageUrl"]).forEach(function(id){
+    els[id] = document.getElementById(id);
+  });
+  var heritageChipsEl = document.getElementById("heritageChips");
+  var previewFrame = document.getElementById("previewFrame");
+  var htmlOut = document.getElementById("htmlOut");
+  var metaOut = document.getElementById("metaOut");
+
+  function escapeHtml(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+  function linesOf(s){
+    return String(s || "").split("\n").map(function(l){return l.trim();}).filter(Boolean);
+  }
+
+  // build heritage chips
+  HERITAGE_LIB.forEach(function(item){
+    var label = document.createElement("label");
+    label.className = "chip";
+    label.dataset.id = item.id;
+    var input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = item.id;
+    var span = document.createElement("span");
+    span.textContent = item.label;
+    label.appendChild(input);
+    label.appendChild(span);
+    heritageChipsEl.appendChild(label);
+    input.addEventListener("change", function(){
+      label.classList.toggle("checked", input.checked);
+      render();
+    });
+    label.addEventListener("click", function(e){
+      if(e.target !== input){ /* let native checkbox toggle handle it via label */ }
+    });
+  });
+
+  function getHeritageChecked(){
+    return Array.prototype.slice.call(heritageChipsEl.querySelectorAll("input:checked")).map(function(i){return i.value;});
+  }
+  function setHeritageChecked(ids){
+    var set = {};
+    (ids||[]).forEach(function(id){ set[id]=true; });
+    Array.prototype.slice.call(heritageChipsEl.querySelectorAll("input")).forEach(function(input){
+      input.checked = !!set[input.value];
+      input.closest(".chip").classList.toggle("checked", input.checked);
+    });
+  }
+
+  function applyPreset(key){
+    var p = PRESETS[key] || PRESETS.custom;
+    els.productName.value = p.productName;
+    els.keyword.value = p.keyword;
+    els.hook.value = p.hook;
+    els.heroCaption.value = p.heroCaption;
+    els.storySeed.value = p.storySeed;
+    els.features.value = p.features;
+    els.proof.value = p.proof;
+    els.usage.value = p.usage;
+    els.caution.value = p.caution;
+    els.ctaText.value = p.ctaText;
+    els.hashtags.value = p.hashtags;
+    els.metaDesc.value = p.metaDesc;
+    setHeritageChecked(p.heritage);
+  }
+
+  function heroBlock(data){
+    if(data.heroImageUrl){
+      return '<div style="text-align:center;margin:0 0 8px;">' +
+        '<img src="' + escapeHtml(data.heroImageUrl) + '" alt="' + escapeHtml(data.heroCaption || data.productName) + '" style="width:100%;max-width:680px;border-radius:14px;display:block;margin:0 auto;" />' +
+        '</div>';
+    }
+    return '<div style="border:2px dashed #c9d6bf;border-radius:14px;background:#f2f6ee;color:#5b6b57;' +
+      'text-align:center;padding:56px 16px;font-size:14px;margin:0 0 8px;">' +
+      '📷 사진 삽입 위치 — ' + escapeHtml(data.heroCaption || "신뢰를 주는 사진 한 장") + '</div>';
+  }
+
+  function buildFragment(data){
+    var heritageSentences = getHeritageChecked().map(function(id){
+      var f = HERITAGE_LIB.filter(function(h){return h.id===id;})[0];
+      return f ? f.text : "";
+    }).filter(Boolean);
+
+    var titleKeyword = data.keyword || data.productName || "터주농산";
+    var title = escapeHtml((titleKeyword ? titleKeyword + " · " : "") + (data.hook || data.productName || "터주농산 이야기"));
+
+    var storyParas = [];
+    if(data.storySeed) storyParas.push('<p style="margin:0 0 10px;">' + escapeHtml(data.storySeed) + '</p>');
+    if(heritageSentences.length){
+      storyParas.push('<p style="margin:0;">' + heritageSentences.map(escapeHtml).join(' ') + '</p>');
+    }
+
+    var featureItems = linesOf(data.features).map(function(l){
+      return '<li style="margin:0 0 8px;">' + escapeHtml(l) + '</li>';
+    }).join("");
+
+    var proofItems = linesOf(data.proof).map(function(l){
+      return '<li style="margin:0 0 10px;list-style:none;padding-left:26px;position:relative;">' +
+        '<span style="position:absolute;left:0;top:1px;">🏅</span>' + escapeHtml(l) + '</li>';
+    }).join("");
+
+    var usageItems = linesOf(data.usage).map(function(l){
+      return '<p style="margin:0 0 6px;">' + escapeHtml(l) + '</p>';
+    }).join("");
+
+    var cautionBlock = data.caution ? (
+      '<p style="margin:14px 0 0;background:#fbf1d9;color:#7a5a06;border-radius:8px;padding:10px 14px;font-size:13.5px;">' +
+      '⚠️ ' + escapeHtml(data.caution) + '</p>'
+    ) : "";
+
+    var ctaBlock = "";
+    if(data.ctaText){
+      var ctaInner = escapeHtml(data.ctaText) + ' →';
+      ctaBlock = data.storeUrl
+        ? '<a href="' + escapeHtml(data.storeUrl) + '" target="_blank" rel="noopener" style="display:inline-block;background:#2f6b3c;color:#fff;' +
+          'padding:14px 30px;border-radius:999px;text-decoration:none;font-weight:700;font-size:15px;">' + ctaInner + '</a>'
+        : '<span style="display:inline-block;background:#2f6b3c;color:#fff;padding:14px 30px;border-radius:999px;font-weight:700;font-size:15px;">' + ctaInner + '</span>';
+    }
+
+    var hashtagLine = String(data.hashtags||"").split(/\s+/).filter(Boolean).map(escapeHtml).join(" ");
+
+    var html = '';
+    html += '<div style="font-family:\'Noto Sans KR\',sans-serif;color:#22301f;line-height:1.85;max-width:720px;margin:0 auto;">\n';
+    html += '  <h1 style="font-family:\'Noto Serif KR\',serif;font-size:25px;line-height:1.4;color:#204a29;margin:0 0 18px;">' + title + '</h1>\n';
+    html += '  ' + heroBlock(data) + '\n';
+    if(data.heroCaption){
+      html += '  <p style="text-align:center;font-size:13px;color:#5b6b57;margin:0 0 26px;">' + escapeHtml(data.heroCaption) + '</p>\n';
+    }
+    if(storyParas.length){
+      html += '  <div style="background:#e3eedd;border-radius:14px;padding:20px 24px;margin:0 0 28px;">\n';
+      html += '    <p style="margin:0 0 8px;font-weight:700;color:#2f6b3c;font-size:14px;">터주농산 이야기</p>\n';
+      html += '    ' + storyParas.join("\n    ") + '\n';
+      html += '  </div>\n';
+    }
+    if(featureItems){
+      html += '  <h2 style="font-family:\'Noto Serif KR\',serif;font-size:19px;color:#204a29;margin:0 0 12px;">' + escapeHtml(data.productName || "이런 점이 다릅니다") + '</h2>\n';
+      html += '  <ul style="margin:0 0 28px;padding-left:20px;">' + featureItems + '</ul>\n';
+    }
+    if(proofItems){
+      html += '  <h2 style="font-family:\'Noto Serif KR\',serif;font-size:19px;color:#204a29;margin:0 0 12px;">믿을 수 있는 이유</h2>\n';
+      html += '  <ul style="margin:0 0 28px;padding-left:0;">' + proofItems + '</ul>\n';
+    }
+    if(usageItems || cautionBlock){
+      html += '  <h2 style="font-family:\'Noto Serif KR\',serif;font-size:19px;color:#204a29;margin:0 0 12px;">이렇게 드세요 / 보관하세요</h2>\n';
+      html += '  ' + usageItems + cautionBlock + '\n';
+    }
+    if(ctaBlock){
+      html += '  <div style="text-align:center;margin:34px 0 22px;">' + ctaBlock + '</div>\n';
+    }
+    if(hashtagLine){
+      html += '  <p style="color:#5b6b57;font-size:14px;margin:0;">' + hashtagLine + '</p>\n';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function collectData(){
+    var data = {};
+    FIELD_IDS.forEach(function(id){ data[id] = els[id] ? els[id].value : ""; });
+    data.heroImageUrl = els.heroImageUrl.value;
+    return data;
+  }
+
+  function render(){
+    var data = collectData();
+    var fragment = buildFragment(data);
+    htmlOut.value = fragment;
+    metaOut.value = data.metaDesc || "";
+
+    var previewDoc = '<!doctype html><html lang="ko"><head><meta charset="utf-8">' +
+      '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@700;900&display=swap">' +
+      '<style>body{margin:0;padding:22px 16px;background:#fff;}</style></head><body>' + fragment + '</body></html>';
+    previewFrame.setAttribute("srcdoc", previewDoc);
+
+    saveDraft(data);
+  }
+
+  function saveDraft(data){
+    try{
+      var toSave = Object.assign({}, data, { heritage: getHeritageChecked() });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+    }catch(e){ /* storage unavailable — ignore */ }
+  }
+
+  function loadDraft(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return false;
+      var data = JSON.parse(raw);
+      FIELD_IDS.forEach(function(id){
+        if(els[id] && typeof data[id] === "string") els[id].value = data[id];
+      });
+      if(typeof data.heroImageUrl === "string") els.heroImageUrl.value = data.heroImageUrl;
+      setHeritageChecked(data.heritage || []);
+      return true;
+    }catch(e){ return false; }
+  }
+
+  // wire inputs
+  FIELD_IDS.concat(["heroImageUrl"]).forEach(function(id){
+    var el = els[id];
+    if(!el) return;
+    el.addEventListener("input", render);
+    el.addEventListener("change", render);
+  });
+
+  els.category.addEventListener("change", function(){
+    applyPreset(els.category.value);
+    render();
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", function(){
+    if(!confirm("입력한 내용을 모두 지우고 현재 카테고리의 예시 문구로 되돌릴까요?")) return;
+    els.heroImageUrl.value = "";
+    applyPreset(els.category.value);
+    render();
+  });
+
+  // tabs
+  var tabButtons = Array.prototype.slice.call(document.querySelectorAll(".tab-btn"));
+  var tabPanels = Array.prototype.slice.call(document.querySelectorAll(".tab-body"));
+  tabButtons.forEach(function(btn){
+    btn.addEventListener("click", function(){
+      tabButtons.forEach(function(b){ b.classList.toggle("active", b===btn); });
+      tabPanels.forEach(function(p){ p.hidden = (p.dataset.panel !== btn.dataset.tab); });
+    });
+  });
+
+  function copyText(text, statusEl){
+    function ok(){ statusEl.textContent = "복사했어요. 티스토리 HTML 모드에 붙여넣으세요."; setTimeout(function(){statusEl.textContent="";}, 3000); }
+    function fail(){ statusEl.textContent = "복사에 실패했어요. 텍스트를 직접 선택해 Ctrl+C로 복사해주세요."; }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(ok, fail);
+    } else {
+      try{
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+        document.body.appendChild(ta); ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        ok();
+      }catch(e){ fail(); }
+    }
+  }
+
+  document.getElementById("copyHtmlFromPreview").addEventListener("click", function(){
+    copyText(htmlOut.value, document.getElementById("statusPreview"));
+  });
+  document.getElementById("copyHtmlFromCode").addEventListener("click", function(){
+    copyText(htmlOut.value, document.getElementById("statusCode"));
+  });
+  document.getElementById("copyMeta").addEventListener("click", function(){
+    copyText(metaOut.value, document.getElementById("statusMeta"));
+  });
+
+  // boot
+  var restored = loadDraft();
+  if(!restored){
+    applyPreset("chip");
+  }
+  render();
+})();
+</script>
+</body>
+</html>

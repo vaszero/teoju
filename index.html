@@ -93,6 +93,10 @@
   }
   label{font-size:13px; font-weight:700; color:var(--ink); display:block; margin-bottom:6px;}
   .hint{font-size:12px; color:var(--ink-soft); margin-top:5px; line-height:1.5;}
+  .type-hint{
+    font-size:12.5px; color:var(--accent-strong); background:var(--accent-soft);
+    border-radius:8px; padding:8px 12px; margin-top:8px; line-height:1.5;
+  }
 
   .app-shell{max-width:1240px; margin:0 auto; padding-block: 22px 60px;}
 
@@ -104,7 +108,7 @@
     font-size:12px; font-weight:700; letter-spacing:.08em; color:var(--accent); text-transform:uppercase;
   }
   header.top h1{font-size:26px; color:var(--accent-strong); margin-top:4px;}
-  header.top p{margin:6px 0 0; color:var(--ink-soft); font-size:14px; max-width:60ch;}
+  header.top p{margin:6px 0 0; color:var(--ink-soft); font-size:14px; max-width:64ch;}
   .reset-btn{
     background:transparent; border:1px solid var(--line); color:var(--ink-soft);
     border-radius:999px; padding:8px 16px; font-size:13px; font-weight:500; cursor:pointer; white-space:nowrap;
@@ -183,7 +187,7 @@
     <div>
       <div class="brand-eyebrow">터주농산 · 티스토리 자동 포스팅 도구</div>
       <h1>터주 포스팅 빌더</h1>
-      <p>제품 정보를 간단히 적으면, 스토리 → 제품 → 후기·인증 → 상세정보 구조의 티스토리용 HTML 글을 자동으로 완성합니다. 완성된 코드를 티스토리 글쓰기의 &lsquo;HTML&rsquo; 모드에 붙여넣으면 그대로 발행됩니다.</p>
+      <p>글 유형(제품 소개 / 정보 전달 / 진정성 일상 / AI 답변 최적화)을 고르고 내용을 간단히 적으면, 그 유형에 맞는 구조로 티스토리용 HTML 글을 완성합니다. 완성된 코드를 티스토리 글쓰기의 &lsquo;HTML&rsquo; 모드에 붙여넣으면 그대로 발행됩니다.</p>
     </div>
     <button class="reset-btn" id="resetBtn" type="button">전체 초기화</button>
   </header>
@@ -193,8 +197,18 @@
     <div class="panel form-panel">
 
       <div class="field-group">
-        <h2>1. 기본 정보</h2>
+        <h2>1. 글 유형 &amp; 기본 정보</h2>
         <div class="field-row">
+          <div>
+            <label for="postType">글 유형</label>
+            <select id="postType">
+              <option value="intro">제품 소개형</option>
+              <option value="info">정보 전달형 (검색/AEO 노출용)</option>
+              <option value="authentic">진정성 일상형</option>
+              <option value="aeo">AI 답변 최적화형 (AEO·GEO)</option>
+            </select>
+            <p class="type-hint" id="typeHint"></p>
+          </div>
           <div>
             <label for="category">상품 카테고리</label>
             <select id="category">
@@ -204,7 +218,7 @@
               <option value="gift">명절 선물세트</option>
               <option value="custom">기타(직접 입력)</option>
             </select>
-            <p class="hint">카테고리를 바꾸면 예시 문구가 채워집니다. 필요한 부분만 고쳐 쓰세요.</p>
+            <p class="hint">유형이나 카테고리를 바꾸면 그에 맞는 예시 문구가 채워집니다. 필요한 부분만 고쳐 쓰세요.</p>
           </div>
           <div class="field-cols">
             <div>
@@ -217,7 +231,7 @@
             </div>
           </div>
           <div>
-            <label for="hook">한 줄 후킹 문구 (부제)</label>
+            <label for="hook" id="hookLabel">한 줄 후킹 문구 (부제)</label>
             <input id="hook" type="text" />
           </div>
         </div>
@@ -236,37 +250,35 @@
               <input id="heroCaption" type="text" />
             </div>
           </div>
-          <p class="hint">벤치마킹 구조: 사진 한 장으로 먼저 신뢰를 주고 → 스토리 → 제품 소개 → 후기/인증 순으로 이어집니다.</p>
         </div>
       </div>
 
-      <div class="field-group">
-        <h2>3. 브랜드 스토리</h2>
+      <div class="field-group" data-visible-types="intro,info,aeo">
+        <h2>3. 브랜드 신뢰 문장</h2>
         <div class="field-row">
           <div>
-            <label for="storySeed">우리 이야기 (한두 문장이면 충분합니다)</label>
-            <textarea id="storySeed" rows="3"></textarea>
+            <label for="storySeed">신뢰를 뒷받침하는 한두 문장</label>
+            <textarea id="storySeed" rows="2"></textarea>
           </div>
           <div>
-            <label>함께 넣을 이력 (선택한 항목이 스토리 뒤에 문장으로 자동 추가됩니다)</label>
+            <label>함께 넣을 이력 (선택한 항목이 문장으로 자동 추가됩니다)</label>
             <div class="chip-group" id="heritageChips"></div>
           </div>
         </div>
       </div>
 
-      <div class="field-group">
+      <!-- intro-only -->
+      <div class="field-group" data-visible-types="intro">
         <h2>4. 제품 특징</h2>
         <label for="features">한 줄에 하나씩 적어주세요</label>
         <textarea id="features" rows="5"></textarea>
       </div>
-
-      <div class="field-group">
+      <div class="field-group" data-visible-types="intro">
         <h2>5. 후기 &amp; 인증</h2>
         <label for="proof">믿을 수 있는 이유 · 후기 · 인증 이력 (한 줄에 하나씩)</label>
         <textarea id="proof" rows="4"></textarea>
       </div>
-
-      <div class="field-group">
+      <div class="field-group" data-visible-types="intro">
         <h2>6. 상세 정보</h2>
         <div class="field-row">
           <div>
@@ -280,11 +292,77 @@
         </div>
       </div>
 
+      <!-- info-only -->
+      <div class="field-group" data-visible-types="info">
+        <h2>4. 정보 콘텐츠</h2>
+        <div class="field-row">
+          <div>
+            <label for="introLine">도입부 (독자가 공감할 만한 한 줄)</label>
+            <input id="introLine" type="text" />
+          </div>
+          <div>
+            <label for="infoBody">핵심 정보 (소제목은 줄 앞에 "## "을 붙여주세요)</label>
+            <textarea id="infoBody" rows="8" placeholder="## 소제목&#10;설명 문장&#10;&#10;## 다음 소제목&#10;설명 문장"></textarea>
+            <p class="hint">예: <code>## 고사리 손질법</code> 다음 줄에 설명을 적으면 소제목+본문으로 자동 정리됩니다.</p>
+          </div>
+          <div>
+            <label for="summaryLine">한 줄 요약 (글 마지막에 배치)</label>
+            <input id="summaryLine" type="text" />
+          </div>
+        </div>
+      </div>
+
+      <!-- authentic-only -->
+      <div class="field-group" data-visible-types="authentic">
+        <h2>4. 오늘 이야기</h2>
+        <div class="field-row">
+          <div>
+            <label for="dateContext">날짜 · 상황 (짧게)</label>
+            <input id="dateContext" type="text" />
+          </div>
+          <div>
+            <label for="dailyStory">오늘 있었던 일 (줄바꿈으로 문단을 나눠주세요)</label>
+            <textarea id="dailyStory" rows="6"></textarea>
+          </div>
+          <div>
+            <label for="reflection">소소한 다짐 · 느낌 한 줄</label>
+            <input id="reflection" type="text" />
+          </div>
+          <div>
+            <label for="closing">마무리 인사말</label>
+            <input id="closing" type="text" />
+          </div>
+        </div>
+      </div>
+
+      <!-- aeo-only -->
+      <div class="field-group" data-visible-types="aeo">
+        <h2>4. 질문에 바로 답하기</h2>
+        <div class="field-row">
+          <div>
+            <label for="directAnswer">한 줄 직접 답변 (가장 먼저 노출됩니다)</label>
+            <textarea id="directAnswer" rows="2"></textarea>
+          </div>
+          <div>
+            <label for="rationale">근거 · 설명</label>
+            <textarea id="rationale" rows="3"></textarea>
+          </div>
+          <div>
+            <label for="faqBlock">자주 묻는 질문 (Q: / A: 형식, 질문마다 한 줄 띄우기)</label>
+            <textarea id="faqBlock" rows="8" placeholder="Q: 질문&#10;A: 답변&#10;&#10;Q: 다음 질문&#10;A: 답변"></textarea>
+          </div>
+          <div>
+            <label for="keyFacts">핵심 요약 (라벨: 값, 한 줄에 하나씩)</label>
+            <textarea id="keyFacts" rows="4" placeholder="원재료: 국산 대추 100%&#10;보관: 서늘하고 건조한 곳"></textarea>
+          </div>
+        </div>
+      </div>
+
       <div class="field-group">
-        <h2>7. 구매 유도</h2>
+        <h2>7. 자연스러운 안내 (선택)</h2>
         <div class="field-cols">
           <div>
-            <label for="ctaText">버튼 문구</label>
+            <label for="ctaText">버튼 문구 (비워두면 표시하지 않습니다)</label>
             <input id="ctaText" type="text" />
           </div>
           <div>
@@ -356,17 +434,25 @@
     </ul>
   </div>
 
-  <footer class="meta-note">이 도구는 입력한 내용을 그대로 정해진 구조(사진 → 스토리 → 제품 → 후기/인증 → 상세정보 → 구매유도)에 넣어 HTML을 만듭니다. 문장은 자동으로 지어내지 않으니, 실제 있었던 이야기와 근거만 적어주세요.</footer>
+  <footer class="meta-note">이 도구는 입력한 내용을 그대로 정해진 구조에 넣어 HTML을 만듭니다. 문장은 자동으로 지어내지 않으니, 실제 있었던 이야기와 근거만 적어주세요. 현재는 완성된 HTML을 복사해서 붙여넣는 방식이며, 티스토리 자동 발행(API 연동)은 별도 서버가 필요한 다음 단계입니다.</footer>
 </div>
 
 <script>
 (function(){
   "use strict";
 
-  var STORAGE_KEY = "teoju-posting-builder-v1";
+  var STORAGE_KEY = "teoju-posting-builder-v2";
 
-  var FIELD_IDS = ["category","productName","keyword","hook","heroImageUrl","heroCaption",
-    "storySeed","features","proof","usage","caution","ctaText","storeUrl","hashtags","metaDesc"];
+  var FIELD_IDS = [
+    "postType","category","productName","keyword","hook",
+    "heroImageUrl","heroCaption",
+    "storySeed",
+    "features","proof","usage","caution",
+    "introLine","infoBody","summaryLine",
+    "dateContext","dailyStory","reflection","closing",
+    "directAnswer","rationale","faqBlock","keyFacts",
+    "ctaText","storeUrl","hashtags","metaDesc"
+  ];
 
   var HERITAGE_LIB = [
     {id:"years26", label:"26년 도매 업력", text:"터주농산은 26년째 대추와 건나물을 다뤄온 도매업의 노하우를 그대로 잇고 있습니다."},
@@ -377,73 +463,244 @@
     {id:"succession", label:"가업 승계", text:"이제 그 노하우를 이어받아, 도매를 넘어 생산까지 준비하고 있습니다."}
   ];
 
-  var PRESETS = {
-    chip: {
-      productName:"국산 대추칩", keyword:"대추칩", hook:"아이 간식으로도 안심하고 건네는 국산 대추칩",
-      heroCaption:"갓 말려 낸 대추칩, 있는 그대로 한 장",
-      storySeed:"26년째 대추를 다묄온 손끝에서 나온 대추칩입니다.",
-      heritage:["years26","onsite","succession"],
-      features:"국산 대추 100%\n설탕·첨가물 없이 얇게 말려 바삭한 식감\n답례품용 프리미엄 포장 가능\n아이 간식, 다과상, 선물용으로 모두 좋음",
-      proof:"실제로 아이가 간식으로 먹는 모습을 영상으로 확인할 수 있어요\n쿠팡 구매 후기에서도 바삭한 식감과 단맛에 대한 평이 많습니다",
-      usage:"밀봉 후 서늘하고 건조한 곳에 보관\n개봉 후에는 냉장 보관 권장\n하루 한 줌(15~20g) 정도가 적당해요",
-      caution:"대추 알레르기가 있다면 섭취 전 확인해 주세요",
-      ctaText:"국산 대추칩 만나보기", storeUrl:"",
-      hashtags:"#대추칩 #국산대추 #건강간식 #답례품추천 #터주농산",
-      metaDesc:"26년 도매 노하우로 고른 국산 대추, 첨가물 없이 얇게 말린 대추칩. 아이 간식과 답례품으로 좋은 이유를 알려드립니다."
+  var TYPE_HINTS = {
+    intro: "제품을 처음 보는 사람에게 신뢰를 주고 구매까지 이어지게 하는 글입니다. (사진 → 스토리 → 제품 → 후기/인증 → 구매유도)",
+    info: "판매보다 정확한 정보 전달이 목적인 글입니다. 검색 노출과 신뢰 축적에 유리합니다. (도입 → 핵심 정보 → 요약)",
+    authentic: "오늘 있었던 일을 그대로 담은 일상형 글입니다. 공감과 신뢰가 목적이며 판매를 강요하지 않습니다.",
+    aeo: "질문에 바로 답하는 구조로, ChatGPT·퍼플렉시티 같은 AI 답변 엔진이 인용하기 쉽게 만든 글입니다. (직접 답변 → 근거 → FAQ → 핵심 요약)"
+  };
+
+  var HOOK_LABELS = {
+    intro: "한 줄 후킹 문구 (부제)",
+    info: "질문형 제목 (독자가 검색할 법한 문장)",
+    authentic: "오늘의 제목 (날짜·상황을 담은 한 줄)",
+    aeo: "질문형 제목 (AI가 답할 법한 질문 그대로)"
+  };
+
+  // TYPE_PRESETS[postType][category] — 각 유형·카테고리 조합의 예시 문구
+  var TYPE_PRESETS = {
+
+    intro: {
+      chip: {
+        productName:"국산 대추칩", keyword:"대추칩", hook:"아이 간식으로도 안심하고 건네는 국산 대추칩",
+        heroCaption:"갓 말려 낸 대추칩, 있는 그대로 한 장",
+        storySeed:"26년째 대추를 다뤄온 손끝에서 나온 대추칩입니다.",
+        heritage:["years26","onsite","succession"],
+        features:"국산 대추 100%\n설탕·첨가물 없이 얇게 말려 바삭한 식감\n답례품용 프리미엄 포장 가능\n아이 간식, 다과상, 선물용으로 모두 좋음",
+        proof:"실제로 아이가 간식으로 먹는 모습을 영상으로 확인할 수 있어요\n쿠팡 구매 후기에서도 바삭한 식감과 단맛에 대한 평이 많습니다",
+        usage:"밀봉 후 서늘하고 건조한 곳에 보관\n개봉 후에는 냉장 보관 권장\n하루 한 줌(15~20g) 정도가 적당해요",
+        caution:"대추 알레르기가 있다면 섭취 전 확인해 주세요",
+        ctaText:"국산 대추칩 만나보기", storeUrl:"",
+        hashtags:"#대추칩 #국산대추 #건강간식 #답례품추천 #터주농산",
+        metaDesc:"26년 도매 노하우로 고른 국산 대추, 첨가물 없이 얇게 말린 대추칩. 아이 간식과 답례품으로 좋은 이유를 알려드립니다."
+      },
+      juice: {
+        productName:"대추씨즙", keyword:"대추씨즙", hook:"잠들기 전 한 잔, 대추씨로 다린 편안함",
+        heroCaption:"오랜 시간 달여낸 대추씨즙 한 병",
+        storySeed:"대추 속 씨까지 오랜 시간 달여낸 터주농산의 대추씨즙입니다.",
+        heritage:["years26","onsite"],
+        features:"대추씨를 장시간 달여낸 깊은 맛\n첨가물 없이 은은한 단맛\n자기 전 한 잔, 편안한 밤을 위한 습관\n선물용 세트 구성 가능",
+        proof:"산지에서 직접 고른 대추로만 달였습니다\n26년 도매 노하우로 고른 대추를 사용합니다",
+        usage:"하루 1~2회, 따뜻하게 데워 드세요\n개봉 후 냉장 보관, 빠르게 드시는 게 좋아요",
+        caution:"카페인은 없지만 취침 전 과다 섭취는 피해주세요",
+        ctaText:"대추씨즙 자세히 보기", storeUrl:"",
+        hashtags:"#대추씨즙 #수면차 #대추차 #국산대추 #터주농산",
+        metaDesc:"대추씨를 오랜 시간 달여낸 터주농산 대추씨즙. 자기 전 한 잔, 편안한 밤을 위한 이유를 알려드립니다."
+      },
+      herb: {
+        productName:"국산 건나물 세트", keyword:"건나물", hook:"고사리·취나물·곤드레, 산에서 온 그대로",
+        heroCaption:"볕에 잘 말린 국산 건나물",
+        storySeed:"26년 도매 경력으로 산지를 직접 다니며 고른 국산 건나물입니다.",
+        heritage:["years26","forest","onsite"],
+        features:"고사리, 취나물, 곤드레 등 국산 나물 구성\n볕에 잘 말려 향이 살아있음\n명절 상차림, 나물 반찬에 바로 활용",
+        proof:"산림조합과 협력해 원산지를 관리합니다\n도매 시장에서 오랫동안 품질을 인정받았습니다",
+        usage:"찬물에 충분히 불려 삶은 후 조리하세요\n밀봉 후 서늘한 곳에 보관하세요",
+        caution:"품목별로 불리는 시간이 다르니 포장 안내를 확인해주세요",
+        ctaText:"국산 건나물 보러 가기", storeUrl:"",
+        hashtags:"#건나물 #국산나물 #고사리 #취나물 #명절상차림",
+        metaDesc:"26년 도매 경력으로 산지를 직접 다니며 고른 국산 건나물. 고사리, 취나물, 곤드레를 만나보세요."
+      },
+      gift: {
+        productName:"명절 선물세트", keyword:"명절 선물세트", hook:"26년 농산물 도매 노하우를 그대로 담은 명절 세트",
+        heroCaption:"정성껏 포장한 명절 선물세트",
+        storySeed:"터주농산이 26년간 다뤄온 대추와 건나물을 명절 선물세트로 엮었습니다.",
+        heritage:["years26","cheongwadae","forest"],
+        features:"대추칩·대추씨즙·건나물 중 선택 구성\n프리미엄 답례품 포장\n원산지와 생산자 이야기를 담은 카드 동봉",
+        proof:"청와대 기념품 납품, 산림조합 협력 등 26년 업력을 그대로 잇습니다",
+        usage:"세트 구성은 시즌(설·추석·정월대보름)에 맞춰 달라집니다\n품목별 보관방법은 개별 안내를 따라주세요",
+        caution:"품목별 보관방법이 다르니 개별 안내를 확인해주세요",
+        ctaText:"명절 세트 구성 보기", storeUrl:"",
+        hashtags:"#명절선물세트 #추석선물 #설선물 #답례품 #터주농산",
+        metaDesc:"26년 농산물 도매 노하우를 그대로 담은 터주농산 명절 선물세트를 소개합니다."
+      },
+      custom: {}
     },
-    juice: {
-      productName:"대추씨즙", keyword:"대추씨즙", hook:"잠들기 전 한 잔, 대추씨로 다린 편안함",
-      heroCaption:"오랜 시간 달여낸 대추씨즙 한 병",
-      storySeed:"대추 속 씨까지 오랜 시간 달여낸 터주농산의 대추씨즙입니다.",
-      heritage:["years26","onsite"],
-      features:"대추씨를 장시간 달여낸 깊은 맛\n첨가물 없이 은은한 단맛\n자기 전 한 잔, 편안한 밤을 위한 습관\n선물용 세트 구성 가능",
-      proof:"산지에서 직접 고른 대추로만 달였습니다\n26년 도매 노하우로 고른 대추를 사용합니다",
-      usage:"하루 1~2회, 따뜻하게 데워 드세요\n개봉 후 냉장 보관, 빠르게 드시는 게 좋아요",
-      caution:"카페인은 없지만 취침 전 과다 섭취는 피해주세요",
-      ctaText:"대추씨즙 자세히 보기", storeUrl:"",
-      hashtags:"#대추씨즙 #수면차 #대추차 #국산대추 #터주농산",
-      metaDesc:"대추씨를 오랜 시간 달여낸 터주농산 대추씨즙. 자기 전 한 잔, 편안한 밤을 위한 이유를 알려드립니다."
+
+    info: {
+      chip: {
+        productName:"국산 대추칩", keyword:"대추칩", hook:"대추칩, 설탕 없이도 달콤한 이유",
+        heroCaption:"성분표를 확인하며 고른 대추칩",
+        storySeed:"26년째 대추를 다뤄온 터주농산이 직접 확인한 내용입니다.",
+        heritage:["years26","onsite"],
+        introLine:"마트 대추칩은 다 똑같아 보이지만, 만드는 방식에 따라 단맛의 정체가 달라집니다.",
+        infoBody:"## 대추가 원래 달콤한 이유\n대추는 말리는 과정에서 수분이 빠지며 당도가 오히려 올라갑니다. 그래서 설탕을 더하지 않아도 자연스럽게 단맛이 납니다.\n\n## 얇게 써는 이유\n얇게 썰어야 말리는 시간이 짧아 대추 본연의 색과 향이 남고, 바삭한 식감이 나옵니다.\n\n## 첨가물 없는 대추칩 고르는 법\n성분표에 대추 100%로 표기되어 있는지, 설탕이나 조청이 추가되지 않았는지 확인하는 것이 가장 확실합니다.",
+        summaryLine:"대추칩의 단맛은 설탕이 아니라 대추 자체의 당도입니다 — 성분표에서 '대추 100%'만 확인하면 됩니다.",
+        ctaText:"", storeUrl:"",
+        hashtags:"#대추칩 #대추효능 #건강간식 #터주농산",
+        metaDesc:"대추칩이 설탕 없이도 단맛이 나는 이유와, 첨가물 없는 대추칩을 고르는 방법을 알려드립니다."
+      },
+      juice: {
+        productName:"대추씨즙", keyword:"대추씨즙", hook:"대추씨즙, 대추차와 뭐가 다를까요?",
+        heroCaption:"오랜 시간 달이는 대추씨즙",
+        storySeed:"26년째 대추를 다뤄온 터주농산이 직접 달여보며 확인한 내용입니다.",
+        heritage:["years26","onsite"],
+        introLine:"대추차와 대추씨즙을 같은 걸로 생각하는 분들이 많지만, 만드는 부위와 방식이 다릅니다.",
+        infoBody:"## 대추살과 대추씨, 다린 부위가 다릅니다\n대추차는 보통 대추 과육 위주로 우려내지만, 대추씨즙은 씨까지 오랜 시간 함께 달여 더 깊은 맛이 납니다.\n\n## 오래 달일수록 진해지는 이유\n장시간 저온으로 달이면 성분이 천천히 우러나며 색과 맛이 진해집니다. 시간을 줄이면 연하고 밍밍한 맛이 됩니다.\n\n## 언제 마시면 좋을까\n따뜻하게 데워 자기 전 한 잔 마시는 습관으로 찾는 분들이 많습니다. 다만 개인차가 있으니 본인 컨디션에 맞게 섭취량을 조절하세요.",
+        summaryLine:"대추씨즙은 대추차보다 오래, 씨까지 함께 달인 진한 차입니다 — 자기 전 습관처럼 마시기 좋습니다.",
+        ctaText:"", storeUrl:"",
+        hashtags:"#대추씨즙 #대추차 #수면차 #터주농산",
+        metaDesc:"대추씨즙과 대추차의 차이, 오래 달일수록 진해지는 이유를 알려드립니다."
+      },
+      herb: {
+        productName:"국산 건나물 세트", keyword:"건나물", hook:"고사리, 왜 하루 종일 불려야 할까요?",
+        heroCaption:"불림 시간을 확인하며 손질하는 건나물",
+        storySeed:"26년째 산지를 다니며 나물을 다뤄온 터주농산의 손질법입니다.",
+        heritage:["years26","forest","onsite"],
+        introLine:"건나물을 사놓고 삶는 시간을 몰라 태우거나 질기게 만드는 경우가 많습니다.",
+        infoBody:"## 건나물마다 불리는 시간이 다른 이유\n섬유질 두께와 말린 정도가 나물마다 달라서, 같은 시간으로 불리면 어떤 건 설익고 어떤 건 물러집니다.\n\n## 고사리 손질법\n찬물에 하루(8~12시간) 불린 뒤 30분 정도 삶고, 삶은 물에 그대로 식혀야 부드러워집니다.\n\n## 취나물·곤드레 손질법\n고사리보다 얇아 3~4시간 불림, 10분 내외로 삶으면 충분합니다.",
+        summaryLine:"건나물은 두께에 따라 불리고 삶는 시간이 다릅니다 — 고사리는 오래, 취나물·곤드레는 짧게가 기본입니다.",
+        ctaText:"", storeUrl:"",
+        hashtags:"#건나물손질법 #고사리 #취나물 #곤드레 #터주농산",
+        metaDesc:"고사리, 취나물, 곤드레 등 건나물별 불리고 삶는 시간을 정리했습니다."
+      },
+      gift: {
+        productName:"명절 선물세트", keyword:"명절 선물세트", hook:"명절 선물세트, 유통기한부터 확인하세요",
+        heroCaption:"포장 표기를 확인하는 명절 선물세트",
+        storySeed:"26년째 농산물을 다뤄온 터주농산이 알려드리는 선물 고르는 기준입니다.",
+        heritage:["years26","cheongwadae"],
+        introLine:"명절 선물은 받는 사람이 바로 못 먹는 경우가 많아, 보관 기간이 의외로 중요한 기준입니다.",
+        infoBody:"## 건조 농산물이 선물로 좋은 이유\n대추칩, 건나물처럼 건조된 상품은 냉장 보관 없이도 상온에서 오래 보관할 수 있어 선물용으로 부담이 적습니다.\n\n## 확인해야 할 표기 사항\n원산지, 제조일자, 소비기한이 포장에 명확히 표기되어 있는지 확인하세요.\n\n## 세트 구성 고르는 법\n받는 분의 가족 구성(아이가 있는지, 나물 요리를 자주 하는지)에 따라 구성 품목을 다르게 고르면 만족도가 높습니다.",
+        summaryLine:"명절 선물은 보관이 쉬운 건조 농산물, 표기 사항이 명확한 상품을 고르는 게 기본입니다.",
+        ctaText:"", storeUrl:"",
+        hashtags:"#명절선물 #추석선물고르는법 #설선물 #터주농산",
+        metaDesc:"명절 선물세트를 고를 때 확인해야 할 보관 방법과 표기 사항을 정리했습니다."
+      },
+      custom: {}
     },
-    herb: {
-      productName:"국산 건나물 세트", keyword:"건나물", hook:"고사리·취나물·곤드레, 산에서 온 그대로",
-      heroCaption:"볕에 잘 말린 국산 건나물",
-      storySeed:"26년 도매 경력으로 산지를 직접 다니며 고른 국산 건나물입니다.",
-      heritage:["years26","forest","onsite"],
-      features:"고사리, 취나물, 곤드레 등 국산 나물 구성\n볕에 잘 말려 향이 살아있음\n명절 상차림, 나물 반찬에 바로 활용",
-      proof:"산림조합과 협력해 원산지를 관리합니다\n도매 시장에서 오랫동안 품질을 인정받았습니다",
-      usage:"찬물에 충분히 불려 삶은 후 조리하세요\n밀봉 후 서늘한 곳에 보관하세요",
-      caution:"품목별로 불리는 시간이 다르니 포장 안내를 확인해주세요",
-      ctaText:"국산 건나물 보러 가기", storeUrl:"",
-      hashtags:"#건나물 #국산나물 #고사리 #취나물 #명절상차림",
-      metaDesc:"26년 도매 경력으로 산지를 직접 다니며 고른 국산 건나물. 고사리, 취나물, 곤드레를 만나보세요."
+
+    authentic: {
+      chip: {
+        productName:"국산 대추칩", keyword:"대추칩", hook:"대추칩 말리던 날, 아이가 옆에서 집어먹었습니다",
+        heroCaption:"건조기에서 막 꺼낸 대추칩",
+        dateContext:"대추칩을 새로 말린 어느 오후",
+        dailyStory:"건조기에서 막 꺼낸 대추칩을 식히고 있는데, 아이가 냄새를 맡고 다가와 손으로 집어 먹기 시작했습니다.\n뜨거우니 조심하라고 몇 번을 말려도 옆에서 계속 손이 갔습니다.\n첨가물 없이 만든 거라 다행이라는 생각이 먼저 들었습니다.",
+        reflection:"내 아이에게 먼저 먹이는 마음으로 만들면, 다른 것도 자연스럽게 따라온다는 걸 다시 느낀 하루였습니다.",
+        closing:"오늘도 대추칩 한 봉지, 여러분 집 간식통에도 편하게 놓아드리고 싶습니다.",
+        ctaText:"", storeUrl:"",
+        hashtags:"#대추칩 #일상 #터주농산이야기",
+        metaDesc:"대추칩을 말리던 날, 아이가 옆에서 집어먹던 이야기를 담았습니다."
+      },
+      juice: {
+        productName:"대추씨즙", keyword:"대추씨즙", hook:"대추씨즙 달이는 냄새로 가득 찬 하루",
+        heroCaption:"가마솥에서 달여지는 대추씨즙",
+        dateContext:"가마솥에 대추씨즙을 달이던 어느 새벽",
+        dailyStory:"새벽부터 불을 올려 대추씨즙을 달였습니다.\n오래 달일수록 좋다는 걸 알기에 시간을 줄이지 않으려고 몇 번을 확인하며 불 앞을 지켰습니다.\n집 안 가득 퍼지는 냄새에 오랜만에 편안한 기분이 들었습니다.",
+        reflection:"시간을 들인 만큼 맛이 진해진다는 걸 알기에, 오늘도 서두르지 않으려고 합니다.",
+        closing:"오래 달인 만큼, 편안한 밤 한 잔으로 찾아뵙겠습니다.",
+        ctaText:"", storeUrl:"",
+        hashtags:"#대추씨즙 #일상 #터주농산이야기",
+        metaDesc:"새벽부터 대추씨즙을 달이던 하루의 이야기를 담았습니다."
+      },
+      herb: {
+        productName:"국산 건나물 세트", keyword:"건나물", hook:"산에서 내려온 나물, 볕 좋은 마당에 널던 날",
+        heroCaption:"마당 가득 펼쳐진 건나물",
+        dateContext:"건나물을 마당에 너는 어느 날",
+        dailyStory:"산지에서 받아온 나물을 마당 가득 펼쳐 널었습니다.\n볕이 좋은 날을 놓치지 않으려고 아침 일찍부터 서둘렀습니다.\n손으로 하나하나 펼치다 보면 나물 상태가 그대로 눈에 들어옵니다.",
+        reflection:"손이 많이 가는 일이지만, 눈으로 직접 확인하고 넘기는 게 맞다고 생각합니다.",
+        closing:"오늘도 볕 좋은 날 잘 말린 나물, 여러분 밥상에 올려드리고 싶습니다.",
+        ctaText:"", storeUrl:"",
+        hashtags:"#건나물 #일상 #터주농산이야기",
+        metaDesc:"산지에서 받아온 나물을 마당에 널던 하루의 이야기를 담았습니다."
+      },
+      gift: {
+        productName:"명절 선물세트", keyword:"명절 선물세트", hook:"명절 선물세트 포장하며 든 생각",
+        heroCaption:"손으로 눌러 담는 명절 선물세트",
+        dateContext:"명절을 앞두고 선물세트를 포장하던 날",
+        dailyStory:"주문이 몰리는 명절 앞이라 포장 작업이 계속됩니다.\n대추칩, 건나물을 하나씩 담으며 받는 분 얼굴을 잠깐씩 떠올려봅니다.\n26년째 이 일을 해온 아버지도 옆에서 함께 포장을 거들었습니다.",
+        reflection:"포장 하나에도 정성을 담고 싶어서, 서두르지 않고 손으로 눌러 담았습니다.",
+        closing:"이번 명절, 저희 마음까지 함께 담아 보내드리겠습니다.",
+        ctaText:"", storeUrl:"",
+        hashtags:"#명절선물세트 #일상 #터주농산이야기",
+        metaDesc:"명절 선물세트를 포장하며 든 생각을 담은 이야기입니다."
+      },
+      custom: {}
     },
-    gift: {
-      productName:"명절 선물세트", keyword:"명절 선물세트", hook:"26년 농산물 도매 노하우를 그대로 담은 명절 세트",
-      heroCaption:"정성껏 포장한 명절 선물세트",
-      storySeed:"터주농산이 26년간 다뤄온 대추와 건나물을 명절 선물세트로 엮었습니다.",
-      heritage:["years26","cheongwadae","forest"],
-      features:"대추칩·대추씨즙·건나물 중 선택 구성\n프리미엄 답례품 포장\n원산지와 생산자 이야기를 담은 카드 동봉",
-      proof:"청와대 기념품 납품, 산림조합 협력 등 26년 업력을 그대로 잇습니다",
-      usage:"세트 구성은 시즌(설·추석·정월대보름)에 맞춰 달라집니다\n품목별 보관방법은 개별 안내를 따라주세요",
-      caution:"품목별 보관방법이 다르니 개별 안내를 확인해주세요",
-      ctaText:"명절 세트 구성 보기", storeUrl:"",
-      hashtags:"#명절선물세트 #추석선물 #설선물 #답례품 #터주농산",
-      metaDesc:"26년 농산물 도매 노하우를 그대로 담은 터주농산 명절 선물세트를 소개합니다."
-    },
-    custom: {
-      productName:"", keyword:"", hook:"", heroCaption:"", storySeed:"", heritage:[],
-      features:"", proof:"", usage:"", caution:"", ctaText:"", storeUrl:"", hashtags:"", metaDesc:""
+
+    aeo: {
+      chip: {
+        productName:"국산 대추칩", keyword:"대추칩", hook:"대추칩은 아이가 먹어도 되나요?",
+        heroCaption:"성분표를 확인한 대추칩",
+        storySeed:"26년째 대추를 다뤄온 터주농산의 기준으로 답합니다.",
+        heritage:["years26","onsite"],
+        directAnswer:"네, 첨가물 없이 대추만 얇게 말린 대추칩은 아이 간식으로 먹일 수 있습니다.",
+        rationale:"설탕이나 조청을 더하지 않고 대추 자체의 수분만 날려 말리기 때문에, 성분표에 대추 100%로 표기된 제품이라면 성인용 간식과 다르지 않은 원재료입니다. 다만 씹는 힘이 약한 영유아는 잘게 부숴 주는 것이 안전합니다.",
+        faqBlock:"Q: 대추칩에 설탕이 들어가나요?\nA: 첨가물 없이 대추만 말린 제품에는 설탕이 들어가지 않습니다.\n\nQ: 하루에 얼마나 먹여도 되나요?\nA: 간식 기준으로 15~20g(한 줌) 정도가 적당합니다.\n\nQ: 대추 알레르기가 있어도 먹일 수 있나요?\nA: 대추 알레르기가 있다면 섭취 전 전문가와 상담 후 소량부터 시도하세요.",
+        keyFacts:"원재료: 국산 대추 100%\n첨가물: 없음(무설탕)\n적정 섭취량: 하루 15~20g\n보관: 서늘하고 건조한 곳, 개봉 후 냉장",
+        ctaText:"대추칩 자세히 보기", storeUrl:"",
+        hashtags:"#대추칩 #아이간식 #터주농산",
+        metaDesc:"대추칩을 아이에게 먹여도 되는지, 하루 적정량과 주의사항을 답합니다."
+      },
+      juice: {
+        productName:"대추씨즙", keyword:"대추씨즙", hook:"대추씨즙은 매일 마셔도 되나요?",
+        heroCaption:"오래 달인 대추씨즙",
+        storySeed:"26년째 대추를 다뤄온 터주농산의 기준으로 답합니다.",
+        heritage:["years26","onsite"],
+        directAnswer:"네, 하루 1~2잔 정도는 매일 마셔도 무리가 없는 수준입니다.",
+        rationale:"대추씨즙은 카페인이 없고 대추와 대추씨를 오랜 시간 달인 음료라, 일반적인 성인이 물 대신 하루 1~2잔 마시는 정도는 특별한 문제가 되지 않습니다. 다만 당도가 있는 음료이므로 혈당 관리가 필요한 경우 섭취량을 조절하는 것이 좋습니다.",
+        faqBlock:"Q: 대추씨즙에 카페인이 있나요?\nA: 없습니다. 자기 전에 마셔도 카페인 걱정은 없습니다.\n\nQ: 데워서 마셔야 하나요?\nA: 따뜻하게 데워 마시는 걸 권장하지만, 차갑게 마셔도 무방합니다.\n\nQ: 임산부도 마실 수 있나요?\nA: 일반적으로 무리는 없으나, 정확한 판단을 위해 담당 의사와 상담 후 섭취하시길 권합니다.",
+        keyFacts:"원재료: 국산 대추 + 대추씨\n카페인: 없음\n추천 섭취: 하루 1~2잔, 따뜻하게\n보관: 개봉 후 냉장, 빠르게 섭취",
+        ctaText:"대추씨즙 자세히 보기", storeUrl:"",
+        hashtags:"#대추씨즙 #대추차 #터주농산",
+        metaDesc:"대추씨즙을 매일 마셔도 되는지, 카페인 여부와 추천 섭취량을 답합니다."
+      },
+      herb: {
+        productName:"국산 건나물 세트", keyword:"건나물", hook:"건나물은 얼마나 불려야 하나요?",
+        heroCaption:"불림 시간을 지켜 손질한 건나물",
+        storySeed:"26년째 산지를 다니며 나물을 다뤄온 터주농산의 기준으로 답합니다.",
+        heritage:["years26","forest","onsite"],
+        directAnswer:"고사리는 8~12시간, 취나물·곤드레는 3~4시간 정도 찬물에 불리는 것이 기본입니다.",
+        rationale:"나물마다 섬유질 두께가 달라 불리는 시간도 달라집니다. 고사리처럼 두꺼운 나물은 충분히 불려야 삶았을 때 질기지 않고, 취나물·곤드레처럼 얇은 나물은 오래 불리면 오히려 물러집니다.",
+        faqBlock:"Q: 하루 종일 불려도 되나요?\nA: 고사리는 하루(8~12시간) 정도가 적당하며, 너무 오래 불리면 향이 빠질 수 있습니다.\n\nQ: 삶은 후 바로 조리해도 되나요?\nA: 삶은 물에 그대로 식힌 뒤 헹궈서 조리하면 더 부드럽습니다.\n\nQ: 남은 건나물은 어떻게 보관하나요?\nA: 밀봉해 서늘하고 건조한 곳에 두면 오래 보관할 수 있습니다.",
+        keyFacts:"고사리: 8~12시간 불림, 30분 삶기\n취나물·곤드레: 3~4시간 불림, 10분 삶기\n원산지: 국산\n보관: 밀봉, 서늘하고 건조한 곳",
+        ctaText:"건나물 세트 보러 가기", storeUrl:"",
+        hashtags:"#건나물 #고사리손질법 #터주농산",
+        metaDesc:"고사리, 취나물, 곤드레 등 건나물별 불리는 시간을 정리해 답합니다."
+      },
+      gift: {
+        productName:"명절 선물세트", keyword:"명절 선물세트", hook:"명절 선물세트, 상온 보관해도 되나요?",
+        heroCaption:"상온 보관이 가능한 명절 선물세트",
+        storySeed:"26년째 농산물을 다뤄온 터주농산의 기준으로 답합니다.",
+        heritage:["years26","cheongwadae"],
+        directAnswer:"네, 대추칩·건나물처럼 건조된 구성이라면 상온 보관이 가능합니다.",
+        rationale:"수분을 날려 말린 농산물은 냉장 없이도 상온에서 비교적 오래 보관할 수 있어, 명절처럼 받는 즉시 소비하지 못하는 선물로도 부담이 적습니다. 다만 개봉 후에는 밀봉하거나 냉장 보관하는 것이 좋습니다.",
+        faqBlock:"Q: 받은 즉시 안 먹어도 되나요?\nA: 미개봉 상태라면 표기된 소비기한 내에서 상온 보관이 가능합니다.\n\nQ: 세트 구성은 매번 같나요?\nA: 시즌(설·추석·정월대보름)에 따라 구성 품목이 달라질 수 있습니다.\n\nQ: 알레르기 표시가 되어 있나요?\nA: 대추가 포함된 구성은 포장에 알레르기 유발 가능 성분을 표기합니다.",
+        keyFacts:"보관: 미개봉 시 상온, 개봉 후 밀봉·냉장\n구성: 대추칩·대추씨즙·건나물 중 선택\n표기: 원산지·제조일자·소비기한 포장에 명시\n업력: 26년 도매 노하우",
+        ctaText:"명절 세트 구성 보기", storeUrl:"",
+        hashtags:"#명절선물세트 #추석선물 #터주농산",
+        metaDesc:"명절 선물세트를 상온 보관해도 되는지, 구성과 표기 사항을 답합니다."
+      },
+      custom: {}
     }
   };
 
   var els = {};
-  FIELD_IDS.concat(["heroImageUrl"]).forEach(function(id){
-    els[id] = document.getElementById(id);
-  });
+  FIELD_IDS.forEach(function(id){ els[id] = document.getElementById(id); });
   var heritageChipsEl = document.getElementById("heritageChips");
   var previewFrame = document.getElementById("previewFrame");
   var htmlOut = document.getElementById("htmlOut");
   var metaOut = document.getElementById("metaOut");
+  var hookLabel = document.getElementById("hookLabel");
+  var typeHint = document.getElementById("typeHint");
 
   function escapeHtml(s){
     return String(s == null ? "" : s)
@@ -451,6 +708,36 @@
   }
   function linesOf(s){
     return String(s || "").split("\n").map(function(l){return l.trim();}).filter(Boolean);
+  }
+  function paragraphsOf(s){
+    return String(s || "").split("\n").map(function(l){return l.trim();}).filter(Boolean);
+  }
+  function parseSections(text){
+    var lines = String(text || "").split("\n");
+    var sections = []; var current = null;
+    lines.forEach(function(line){
+      var m = line.match(/^##\s+(.*)/);
+      if(m){ current = {heading: m[1].trim(), body: []}; sections.push(current); }
+      else if(current && line.trim()){ current.body.push(line.trim()); }
+    });
+    return sections;
+  }
+  function parseFaq(text){
+    var blocks = String(text || "").split(/\n\s*\n/).map(function(b){return b.trim();}).filter(Boolean);
+    var out = [];
+    blocks.forEach(function(b){
+      var m = b.match(/^Q\s*[:：]\s*([\s\S]*?)\nA\s*[:：]\s*([\s\S]*)$/i);
+      if(m) out.push({q:m[1].trim(), a:m[2].trim()});
+    });
+    return out;
+  }
+  function parseKeyFacts(text){
+    return linesOf(text).map(function(l){
+      var idx = l.indexOf(":");
+      if(idx === -1) idx = l.indexOf("：");
+      if(idx === -1) return {label:l, value:""};
+      return {label:l.slice(0,idx).trim(), value:l.slice(idx+1).trim()};
+    });
   }
 
   // build heritage chips
@@ -470,9 +757,6 @@
       label.classList.toggle("checked", input.checked);
       render();
     });
-    label.addEventListener("click", function(e){
-      if(e.target !== input){ /* let native checkbox toggle handle it via label */ }
-    });
   });
 
   function getHeritageChecked(){
@@ -486,22 +770,31 @@
       input.closest(".chip").classList.toggle("checked", input.checked);
     });
   }
+  function heritageSentences(){
+    return getHeritageChecked().map(function(id){
+      var f = HERITAGE_LIB.filter(function(h){return h.id===id;})[0];
+      return f ? f.text : "";
+    }).filter(Boolean);
+  }
 
-  function applyPreset(key){
-    var p = PRESETS[key] || PRESETS.custom;
-    els.productName.value = p.productName;
-    els.keyword.value = p.keyword;
-    els.hook.value = p.hook;
-    els.heroCaption.value = p.heroCaption;
-    els.storySeed.value = p.storySeed;
-    els.features.value = p.features;
-    els.proof.value = p.proof;
-    els.usage.value = p.usage;
-    els.caution.value = p.caution;
-    els.ctaText.value = p.ctaText;
-    els.hashtags.value = p.hashtags;
-    els.metaDesc.value = p.metaDesc;
-    setHeritageChecked(p.heritage);
+  function applyPreset(type, category){
+    var p = (TYPE_PRESETS[type] && TYPE_PRESETS[type][category]) || {};
+    FIELD_IDS.forEach(function(id){
+      if(id === "postType" || id === "category") return;
+      if(!els[id]) return;
+      els[id].value = typeof p[id] === "string" ? p[id] : "";
+    });
+    setHeritageChecked(p.heritage || []);
+  }
+
+  function updateFieldVisibility(){
+    var t = els.postType.value;
+    document.querySelectorAll("[data-visible-types]").forEach(function(el){
+      var types = el.dataset.visibleTypes.split(",");
+      el.hidden = types.indexOf(t) === -1;
+    });
+    hookLabel.textContent = HOOK_LABELS[t] || HOOK_LABELS.intro;
+    typeHint.textContent = TYPE_HINTS[t] || "";
   }
 
   function heroBlock(data){
@@ -515,57 +808,61 @@
       '📷 사진 삽입 위치 — ' + escapeHtml(data.heroCaption || "신뢰를 주는 사진 한 장") + '</div>';
   }
 
-  function buildFragment(data){
-    var heritageSentences = getHeritageChecked().map(function(id){
-      var f = HERITAGE_LIB.filter(function(h){return h.id===id;})[0];
-      return f ? f.text : "";
-    }).filter(Boolean);
+  function heroCaptionLine(data){
+    return data.heroCaption ? '<p style="text-align:center;font-size:13px;color:#5b6b57;margin:0 0 26px;">' + escapeHtml(data.heroCaption) + '</p>\n' : "";
+  }
 
+  function ctaBlock(data){
+    if(!data.ctaText) return "";
+    var ctaInner = escapeHtml(data.ctaText) + ' →';
+    var inner = data.storeUrl
+      ? '<a href="' + escapeHtml(data.storeUrl) + '" target="_blank" rel="noopener" style="display:inline-block;background:#2f6b3c;color:#fff;' +
+        'padding:14px 30px;border-radius:999px;text-decoration:none;font-weight:700;font-size:15px;">' + ctaInner + '</a>'
+      : '<span style="display:inline-block;background:#2f6b3c;color:#fff;padding:14px 30px;border-radius:999px;font-weight:700;font-size:15px;">' + ctaInner + '</span>';
+    return '<div style="text-align:center;margin:34px 0 22px;">' + inner + '</div>\n';
+  }
+
+  function hashtagLine(data){
+    var line = String(data.hashtags||"").split(/\s+/).filter(Boolean).map(escapeHtml).join(" ");
+    return line ? '<p style="color:#5b6b57;font-size:14px;margin:0;">' + line + '</p>\n' : "";
+  }
+
+  function wrapOpen(){
+    return '<div style="font-family:\'Noto Sans KR\',sans-serif;color:#22301f;line-height:1.85;max-width:720px;margin:0 auto;">\n';
+  }
+  function titleBlock(title){
+    return '  <h1 style="font-family:\'Noto Serif KR\',serif;font-size:25px;line-height:1.4;color:#204a29;margin:0 0 18px;">' + title + '</h1>\n';
+  }
+
+  // ---------- 제품 소개형 ----------
+  function buildIntro(data){
+    var heritage = heritageSentences();
     var titleKeyword = data.keyword || data.productName || "터주농산";
     var title = escapeHtml((titleKeyword ? titleKeyword + " · " : "") + (data.hook || data.productName || "터주농산 이야기"));
 
     var storyParas = [];
     if(data.storySeed) storyParas.push('<p style="margin:0 0 10px;">' + escapeHtml(data.storySeed) + '</p>');
-    if(heritageSentences.length){
-      storyParas.push('<p style="margin:0;">' + heritageSentences.map(escapeHtml).join(' ') + '</p>');
-    }
+    if(heritage.length) storyParas.push('<p style="margin:0;">' + heritage.map(escapeHtml).join(' ') + '</p>');
 
     var featureItems = linesOf(data.features).map(function(l){
       return '<li style="margin:0 0 8px;">' + escapeHtml(l) + '</li>';
     }).join("");
-
     var proofItems = linesOf(data.proof).map(function(l){
       return '<li style="margin:0 0 10px;list-style:none;padding-left:26px;position:relative;">' +
         '<span style="position:absolute;left:0;top:1px;">🏅</span>' + escapeHtml(l) + '</li>';
     }).join("");
-
     var usageItems = linesOf(data.usage).map(function(l){
       return '<p style="margin:0 0 6px;">' + escapeHtml(l) + '</p>';
     }).join("");
-
     var cautionBlock = data.caution ? (
       '<p style="margin:14px 0 0;background:#fbf1d9;color:#7a5a06;border-radius:8px;padding:10px 14px;font-size:13.5px;">' +
       '⚠️ ' + escapeHtml(data.caution) + '</p>'
     ) : "";
 
-    var ctaBlock = "";
-    if(data.ctaText){
-      var ctaInner = escapeHtml(data.ctaText) + ' →';
-      ctaBlock = data.storeUrl
-        ? '<a href="' + escapeHtml(data.storeUrl) + '" target="_blank" rel="noopener" style="display:inline-block;background:#2f6b3c;color:#fff;' +
-          'padding:14px 30px;border-radius:999px;text-decoration:none;font-weight:700;font-size:15px;">' + ctaInner + '</a>'
-        : '<span style="display:inline-block;background:#2f6b3c;color:#fff;padding:14px 30px;border-radius:999px;font-weight:700;font-size:15px;">' + ctaInner + '</span>';
-    }
-
-    var hashtagLine = String(data.hashtags||"").split(/\s+/).filter(Boolean).map(escapeHtml).join(" ");
-
-    var html = '';
-    html += '<div style="font-family:\'Noto Sans KR\',sans-serif;color:#22301f;line-height:1.85;max-width:720px;margin:0 auto;">\n';
-    html += '  <h1 style="font-family:\'Noto Serif KR\',serif;font-size:25px;line-height:1.4;color:#204a29;margin:0 0 18px;">' + title + '</h1>\n';
+    var html = wrapOpen();
+    html += titleBlock(title);
     html += '  ' + heroBlock(data) + '\n';
-    if(data.heroCaption){
-      html += '  <p style="text-align:center;font-size:13px;color:#5b6b57;margin:0 0 26px;">' + escapeHtml(data.heroCaption) + '</p>\n';
-    }
+    html += '  ' + heroCaptionLine(data);
     if(storyParas.length){
       html += '  <div style="background:#e3eedd;border-radius:14px;padding:20px 24px;margin:0 0 28px;">\n';
       html += '    <p style="margin:0 0 8px;font-weight:700;color:#2f6b3c;font-size:14px;">터주농산 이야기</p>\n';
@@ -584,24 +881,135 @@
       html += '  <h2 style="font-family:\'Noto Serif KR\',serif;font-size:19px;color:#204a29;margin:0 0 12px;">이렇게 드세요 / 보관하세요</h2>\n';
       html += '  ' + usageItems + cautionBlock + '\n';
     }
-    if(ctaBlock){
-      html += '  <div style="text-align:center;margin:34px 0 22px;">' + ctaBlock + '</div>\n';
-    }
-    if(hashtagLine){
-      html += '  <p style="color:#5b6b57;font-size:14px;margin:0;">' + hashtagLine + '</p>\n';
-    }
+    html += '  ' + ctaBlock(data);
+    html += '  ' + hashtagLine(data);
     html += '</div>';
     return html;
+  }
+
+  // ---------- 정보 전달형 ----------
+  function buildInfo(data){
+    var heritage = heritageSentences();
+    var title = escapeHtml(data.hook || data.productName || "터주농산 정보");
+    var sections = parseSections(data.infoBody);
+
+    var html = wrapOpen();
+    html += titleBlock(title);
+    html += '  ' + heroBlock(data) + '\n';
+    html += '  ' + heroCaptionLine(data);
+    if(data.introLine){
+      html += '  <p style="font-size:15.5px;margin:0 0 26px;">' + escapeHtml(data.introLine) + '</p>\n';
+    }
+    sections.forEach(function(sec){
+      html += '  <h2 style="font-family:\'Noto Serif KR\',serif;font-size:18px;color:#204a29;margin:0 0 10px;">' + escapeHtml(sec.heading) + '</h2>\n';
+      sec.body.forEach(function(p){
+        html += '  <p style="margin:0 0 20px;">' + escapeHtml(p) + '</p>\n';
+      });
+    });
+    if(data.summaryLine){
+      html += '  <div style="background:#e3eedd;border-radius:14px;padding:18px 22px;margin:8px 0 28px;">\n';
+      html += '    <p style="margin:0;font-weight:700;color:#2f6b3c;">한 줄 정리</p>\n';
+      html += '    <p style="margin:8px 0 0;">' + escapeHtml(data.summaryLine) + '</p>\n';
+      html += '  </div>\n';
+    }
+    if(heritage.length){
+      html += '  <p style="font-size:13px;color:#5b6b57;border-top:1px solid #dbe3d1;padding-top:14px;margin:16px 0 0;">' + heritage.map(escapeHtml).join(' ') + '</p>\n';
+    }
+    html += '  ' + ctaBlock(data);
+    html += '  ' + hashtagLine(data);
+    html += '</div>';
+    return html;
+  }
+
+  // ---------- 진정성 일상형 ----------
+  function buildAuthentic(data){
+    var title = escapeHtml(data.hook || "터주농산 이야기");
+
+    var html = wrapOpen();
+    if(data.dateContext){
+      html += '  <p style="font-size:12.5px;color:#a5761f;font-weight:700;letter-spacing:.03em;margin:0 0 8px;">' + escapeHtml(data.dateContext) + '</p>\n';
+    }
+    html += titleBlock(title);
+    html += '  ' + heroBlock(data) + '\n';
+    html += '  ' + heroCaptionLine(data);
+    paragraphsOf(data.dailyStory).forEach(function(p){
+      html += '  <p style="margin:0 0 18px;">' + escapeHtml(p) + '</p>\n';
+    });
+    if(data.reflection){
+      html += '  <blockquote style="margin:0 0 26px;padding:16px 20px;background:#f8eed7;border-left:4px solid #a5761f;border-radius:0 10px 10px 0;color:#5b4110;font-style:normal;">' +
+        escapeHtml(data.reflection) + '</blockquote>\n';
+    }
+    if(data.closing){
+      html += '  <p style="margin:0 0 20px;">' + escapeHtml(data.closing) + '</p>\n';
+    }
+    html += '  ' + ctaBlock(data);
+    html += '  ' + hashtagLine(data);
+    html += '</div>';
+    return html;
+  }
+
+  // ---------- AEO·GEO 최적화형 ----------
+  function buildAeo(data){
+    var heritage = heritageSentences();
+    var title = escapeHtml(data.hook || "자주 묻는 질문");
+    var faqs = parseFaq(data.faqBlock);
+    var facts = parseKeyFacts(data.keyFacts);
+
+    var html = wrapOpen();
+    html += titleBlock(title);
+    if(data.directAnswer){
+      html += '  <div style="background:#e3eedd;border:1px solid #2f6b3c;border-radius:14px;padding:18px 22px;margin:0 0 22px;">\n';
+      html += '    <p style="margin:0;font-weight:700;color:#204a29;font-size:16px;">' + escapeHtml(data.directAnswer) + '</p>\n';
+      html += '  </div>\n';
+    }
+    html += '  ' + heroBlock(data) + '\n';
+    html += '  ' + heroCaptionLine(data);
+    if(data.rationale){
+      html += '  <p style="margin:0 0 24px;">' + escapeHtml(data.rationale) + '</p>\n';
+    }
+    if(heritage.length){
+      html += '  <p style="font-size:13px;color:#5b6b57;margin:0 0 26px;">' + heritage.map(escapeHtml).join(' ') + '</p>\n';
+    }
+    if(faqs.length){
+      html += '  <h2 style="font-family:\'Noto Serif KR\',serif;font-size:18px;color:#204a29;margin:0 0 12px;">자주 묻는 질문</h2>\n';
+      faqs.forEach(function(f){
+        html += '  <h3 style="font-size:15px;color:#2f6b3c;margin:0 0 6px;">Q. ' + escapeHtml(f.q) + '</h3>\n';
+        html += '  <p style="margin:0 0 18px;">' + escapeHtml(f.a) + '</p>\n';
+      });
+    }
+    if(facts.length){
+      html += '  <h2 style="font-family:\'Noto Serif KR\',serif;font-size:18px;color:#204a29;margin:24px 0 12px;">핵심 요약</h2>\n';
+      html += '  <table style="width:100%;border-collapse:collapse;margin:0 0 26px;font-size:14.5px;">\n';
+      facts.forEach(function(f){
+        html += '    <tr style="border-bottom:1px solid #dbe3d1;">' +
+          '<td style="padding:8px 10px 8px 0;color:#5b6b57;white-space:nowrap;vertical-align:top;">' + escapeHtml(f.label) + '</td>' +
+          '<td style="padding:8px 0;">' + escapeHtml(f.value) + '</td></tr>\n';
+      });
+      html += '  </table>\n';
+    }
+    html += '  ' + ctaBlock(data);
+    html += '  ' + hashtagLine(data);
+    html += '</div>';
+    return html;
+  }
+
+  function buildFragment(data){
+    switch(data.postType){
+      case "info": return buildInfo(data);
+      case "authentic": return buildAuthentic(data);
+      case "aeo": return buildAeo(data);
+      default: return buildIntro(data);
+    }
   }
 
   function collectData(){
     var data = {};
     FIELD_IDS.forEach(function(id){ data[id] = els[id] ? els[id].value : ""; });
-    data.heroImageUrl = els.heroImageUrl.value;
     return data;
   }
 
   function render(){
+    updateFieldVisibility();
     var data = collectData();
     var fragment = buildFragment(data);
     htmlOut.value = fragment;
@@ -630,29 +1038,31 @@
       FIELD_IDS.forEach(function(id){
         if(els[id] && typeof data[id] === "string") els[id].value = data[id];
       });
-      if(typeof data.heroImageUrl === "string") els.heroImageUrl.value = data.heroImageUrl;
       setHeritageChecked(data.heritage || []);
       return true;
     }catch(e){ return false; }
   }
 
   // wire inputs
-  FIELD_IDS.concat(["heroImageUrl"]).forEach(function(id){
+  FIELD_IDS.forEach(function(id){
     var el = els[id];
-    if(!el) return;
+    if(!el || id === "postType" || id === "category") return;
     el.addEventListener("input", render);
     el.addEventListener("change", render);
   });
 
+  els.postType.addEventListener("change", function(){
+    applyPreset(els.postType.value, els.category.value);
+    render();
+  });
   els.category.addEventListener("change", function(){
-    applyPreset(els.category.value);
+    applyPreset(els.postType.value, els.category.value);
     render();
   });
 
   document.getElementById("resetBtn").addEventListener("click", function(){
-    if(!confirm("입력한 내용을 모두 지우고 현재 카테고리의 예시 문구로 되돌릴까요?")) return;
-    els.heroImageUrl.value = "";
-    applyPreset(els.category.value);
+    if(!confirm("입력한 내용을 모두 지우고 현재 글 유형·카테고리의 예시 문구로 되돌릴까요?")) return;
+    applyPreset(els.postType.value, els.category.value);
     render();
   });
 
@@ -696,7 +1106,9 @@
   // boot
   var restored = loadDraft();
   if(!restored){
-    applyPreset("chip");
+    els.postType.value = "intro";
+    els.category.value = "chip";
+    applyPreset("intro", "chip");
   }
   render();
 })();

@@ -76,6 +76,7 @@
   [hidden]{display:none!important;}
   h1,h2,h3{text-wrap: balance; font-family:'Noto Serif KR', serif; margin:0;}
   button{font-family:inherit;}
+  code{background:var(--surface-alt); padding:1px 5px; border-radius:4px; font-size:12px;}
   textarea, input, select{
     font-family:inherit;
     font-size:14px;
@@ -102,7 +103,7 @@
 
   header.top{
     display:flex; flex-wrap:wrap; gap:14px 28px; align-items:flex-end; justify-content:space-between;
-    padding-bottom:18px; border-bottom:1px solid var(--line); margin-bottom:22px;
+    padding-bottom:18px; border-bottom:1px solid var(--line); margin-bottom:18px;
   }
   .brand-eyebrow{
     font-size:12px; font-weight:700; letter-spacing:.08em; color:var(--accent); text-transform:uppercase;
@@ -114,6 +115,20 @@
     border-radius:999px; padding:8px 16px; font-size:13px; font-weight:500; cursor:pointer; white-space:nowrap;
   }
   .reset-btn:hover{border-color:var(--accent); color:var(--accent-strong);}
+
+  .mode-tabs{display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;}
+  .mode-btn{
+    flex:1; min-width:220px; text-align:left; background:var(--surface); border:1px solid var(--line);
+    border-radius:14px; padding:14px 16px; cursor:pointer; box-shadow:var(--shadow);
+  }
+  .mode-btn .mode-num{
+    display:inline-block; font-size:11px; font-weight:700; color:var(--accent); letter-spacing:.06em;
+    text-transform:uppercase; margin-bottom:4px;
+  }
+  .mode-btn .mode-title{font-size:15px; font-weight:700; color:var(--ink); font-family:'Noto Serif KR',serif;}
+  .mode-btn .mode-desc{font-size:12.5px; color:var(--ink-soft); margin-top:4px; line-height:1.5;}
+  .mode-btn.active{border-color:var(--accent); background:var(--accent-soft);}
+  .mode-btn.active .mode-title{color:var(--accent-strong);}
 
   .workspace{
     display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap:22px; align-items:start;
@@ -136,6 +151,11 @@
   .field-row{display:flex; flex-direction:column; gap:14px;}
   .field-cols{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
   @media (max-width:520px){.field-cols{grid-template-columns:1fr;}}
+
+  .step-badge{
+    display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px;
+    border-radius:50%; background:var(--accent); color:#fff; font-size:11px; font-weight:700; margin-right:6px;
+  }
 
   .chip-group{display:flex; flex-wrap:wrap; gap:8px; margin-top:2px;}
   .chip{
@@ -168,10 +188,16 @@
   .copy-status{font-size:12px; color:var(--accent-strong); min-height:16px;}
 
   iframe#previewFrame{
-    width:100%; height:520px; border:1px solid var(--line); border-radius:10px; background:#fff;
+    width:100%; height:460px; border:1px solid var(--line); border-radius:10px; background:#fff;
   }
-  textarea#htmlOut{width:100%; height:420px; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:12px; line-height:1.55;}
+  textarea#htmlOut{width:100%; height:380px; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:12px; line-height:1.55;}
   textarea#metaOut{width:100%; height:90px; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:12px;}
+  textarea#promptOut{width:100%; height:260px; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:12.5px; line-height:1.6; background:var(--surface-alt);}
+
+  .flow-note{
+    display:flex; gap:10px; align-items:flex-start; background:var(--gold-soft); border:1px solid var(--gold);
+    border-radius:12px; padding:12px 14px; font-size:13px; color:var(--warn-ink); line-height:1.6;
+  }
 
   .todo-panel{margin-top:26px; padding:18px 22px; background:var(--gold-soft); border:1px solid var(--gold); border-radius:14px;}
   .todo-panel h2{font-size:14px; color:var(--warn-ink); margin-bottom:8px; font-family:'Noto Sans KR',sans-serif;}
@@ -187,17 +213,30 @@
     <div>
       <div class="brand-eyebrow">터주농산 · 티스토리 자동 포스팅 도구</div>
       <h1>터주 포스팅 빌더</h1>
-      <p>글 유형(제품 소개 / 정보 전달 / 진정성 일상 / AI 답변 최적화)을 고르고 내용을 간단히 적으면, 그 유형에 맞는 구조로 티스토리용 HTML 글을 완성합니다. 완성된 코드를 티스토리 글쓰기의 &lsquo;HTML&rsquo; 모드에 붙여넣으면 그대로 발행됩니다.</p>
+      <p>오늘 쓰고 싶은 내용을 편하게 적으면, AEO·GEO에 맞는 프롬프트를 만들어드립니다. 무료 ChatGPT나 Claude.ai에 붙여넣어 실행한 뒤 결과를 다시 붙여넣으면, 티스토리에 바로 올릴 수 있는 HTML로 완성됩니다. 이 도구 자체는 API 비용이 전혀 들지 않습니다.</p>
     </div>
     <button class="reset-btn" id="resetBtn" type="button">전체 초기화</button>
   </header>
+
+  <div class="mode-tabs">
+    <button class="mode-btn active" id="modeBtnDraft" type="button">
+      <span class="mode-num">방법 1 · 추천</span>
+      <div class="mode-title">오늘 쓴 메모, AI에게 다듬어달라기</div>
+      <div class="mode-desc">편하게 적은 초안 → AEO·GEO 프롬프트 자동 생성 → 무료 AI 챗에서 실행 → 결과 붙여넣기</div>
+    </button>
+    <button class="mode-btn" id="modeBtnManual" type="button">
+      <span class="mode-num">방법 2</span>
+      <div class="mode-title">항목별로 직접 입력해서 만들기</div>
+      <div class="mode-desc">제품명·특징·후기 등을 항목별로 채우면 바로 완성되는 방식 (외부 AI 필요 없음)</div>
+    </button>
+  </div>
 
   <div class="workspace">
     <!-- FORM -->
     <div class="panel form-panel">
 
       <div class="field-group">
-        <h2>1. 글 유형 &amp; 기본 정보</h2>
+        <h2>글 유형 &amp; 기본 정보</h2>
         <div class="field-row">
           <div>
             <label for="postType">글 유형</label>
@@ -218,8 +257,50 @@
               <option value="gift">명절 선물세트</option>
               <option value="custom">기타(직접 입력)</option>
             </select>
-            <p class="hint">유형이나 카테고리를 바꾸면 그에 맞는 예시 문구가 채워집니다. 필요한 부분만 고쳐 쓰세요.</p>
           </div>
+        </div>
+      </div>
+
+      <!-- ============ MODE: DRAFT (AI에게 맡기기) ============ -->
+      <div id="modeDraft">
+        <div class="field-group">
+          <h2><span class="step-badge">1</span>오늘 글감</h2>
+          <div class="field-row">
+            <div>
+              <label for="title">글 제목 (있으면 적어주세요, 없어도 됩니다)</label>
+              <input id="title" type="text" placeholder="비워두면 AI가 지어준 제목을 나중에 넣으시면 됩니다" />
+            </div>
+            <div>
+              <label for="draftText">오늘 쓰고 싶은 내용을 편하게 적어주세요</label>
+              <textarea id="draftText" rows="7" placeholder="메모, 있었던 일, 하고 싶은 말 등 무엇이든 편하게 적어주세요. 문장이 정리되어 있지 않아도 괜찮습니다."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <h2><span class="step-badge">2</span>AI 프롬프트 (자동 생성됨)</h2>
+          <div class="field-row">
+            <textarea id="promptOut" readonly></textarea>
+            <div class="copy-row">
+              <button class="copy-btn" id="copyPrompt" type="button">프롬프트 복사</button>
+            </div>
+            <div class="copy-status" id="statusPrompt" aria-live="polite"></div>
+            <div class="flow-note">
+              <span>💡</span>
+              <span>위 프롬프트를 복사해서 <strong>ChatGPT(무료)</strong>나 <strong>Claude.ai(무료)</strong>에 붙여넣고 실행하세요. 나온 답변 전체를 복사해서 아래 3번 칸에 붙여넣으면 됩니다.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <h2><span class="step-badge">3</span>AI가 써준 글 붙여넣기</h2>
+          <textarea id="pasteResult" rows="10" placeholder="ChatGPT나 Claude가 써준 글 전체를 여기에 붙여넣으세요. ## 소제목, **강조**, Q: / A: 형식을 그대로 인식해서 서식을 입혀드립니다."></textarea>
+        </div>
+      </div>
+
+      <!-- ============ MODE: MANUAL (직접 입력) ============ -->
+      <div id="modeManual" hidden>
+        <div class="field-group">
           <div class="field-cols">
             <div>
               <label for="productName">제품명</label>
@@ -230,150 +311,144 @@
               <input id="keyword" type="text" placeholder="예: 대추칩" />
             </div>
           </div>
-          <div>
+          <div style="margin-top:14px;">
             <label for="hook" id="hookLabel">한 줄 후킹 문구 (부제)</label>
             <input id="hook" type="text" />
           </div>
         </div>
+
+        <div class="field-group" data-visible-types="intro,info,aeo">
+          <h2>브랜드 신뢰 문장</h2>
+          <div class="field-row">
+            <div>
+              <label for="storySeed">신뢰를 뒷받침하는 한두 문장</label>
+              <textarea id="storySeed" rows="2"></textarea>
+            </div>
+            <div>
+              <label>함께 넣을 이력 (선택한 항목이 문장으로 자동 추가됩니다)</label>
+              <div class="chip-group" id="heritageChips"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group" data-visible-types="intro">
+          <h2>제품 특징</h2>
+          <label for="features">한 줄에 하나씩 적어주세요</label>
+          <textarea id="features" rows="5"></textarea>
+        </div>
+        <div class="field-group" data-visible-types="intro">
+          <h2>후기 &amp; 인증</h2>
+          <label for="proof">믿을 수 있는 이유 · 후기 · 인증 이력 (한 줄에 하나씩)</label>
+          <textarea id="proof" rows="4"></textarea>
+        </div>
+        <div class="field-group" data-visible-types="intro">
+          <h2>상세 정보</h2>
+          <div class="field-row">
+            <div>
+              <label for="usage">섭취/보관 방법 (한 줄에 하나씩)</label>
+              <textarea id="usage" rows="3"></textarea>
+            </div>
+            <div>
+              <label for="caution">주의사항 (있을 때만 노출됩니다)</label>
+              <input id="caution" type="text" />
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group" data-visible-types="info">
+          <h2>정보 콘텐츠</h2>
+          <div class="field-row">
+            <div>
+              <label for="introLine">도입부 (독자가 공감할 만한 한 줄)</label>
+              <input id="introLine" type="text" />
+            </div>
+            <div>
+              <label for="infoBody">핵심 정보 (소제목은 줄 앞에 "## "을 붙여주세요)</label>
+              <textarea id="infoBody" rows="8" placeholder="## 소제목&#10;설명 문장&#10;&#10;## 다음 소제목&#10;설명 문장"></textarea>
+            </div>
+            <div>
+              <label for="summaryLine">한 줄 요약 (글 마지막에 배치)</label>
+              <input id="summaryLine" type="text" />
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group" data-visible-types="authentic">
+          <h2>오늘 이야기</h2>
+          <div class="field-row">
+            <div>
+              <label for="dateContext">날짜 · 상황 (짧게)</label>
+              <input id="dateContext" type="text" />
+            </div>
+            <div>
+              <label for="dailyStory">오늘 있었던 일 (줄바꿈으로 문단을 나눠주세요)</label>
+              <textarea id="dailyStory" rows="6"></textarea>
+            </div>
+            <div>
+              <label for="reflection">소소한 다짐 · 느낌 한 줄</label>
+              <input id="reflection" type="text" />
+            </div>
+            <div>
+              <label for="closing">마무리 인사말</label>
+              <input id="closing" type="text" />
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group" data-visible-types="aeo">
+          <h2>질문에 바로 답하기</h2>
+          <div class="field-row">
+            <div>
+              <label for="directAnswer">한 줄 직접 답변 (가장 먼저 노출됩니다)</label>
+              <textarea id="directAnswer" rows="2"></textarea>
+            </div>
+            <div>
+              <label for="rationale">근거 · 설명</label>
+              <textarea id="rationale" rows="3"></textarea>
+            </div>
+            <div>
+              <label for="faqBlock">자주 묻는 질문 (Q: / A: 형식, 질문마다 한 줄 띄우기)</label>
+              <textarea id="faqBlock" rows="8" placeholder="Q: 질문&#10;A: 답변&#10;&#10;Q: 다음 질문&#10;A: 답변"></textarea>
+            </div>
+            <div>
+              <label for="keyFacts">핵심 요약 (라벨: 값, 한 줄에 하나씩)</label>
+              <textarea id="keyFacts" rows="4" placeholder="원재료: 국산 대추 100%&#10;보관: 서늘하고 건조한 곳"></textarea>
+            </div>
+          </div>
+        </div>
       </div>
 
+      <!-- ============ SHARED (두 방식 공통) ============ -->
       <div class="field-group">
-        <h2>2. 신뢰를 주는 사진</h2>
-        <div class="field-row">
-          <div class="field-cols">
-            <div>
-              <label for="heroImageUrl">사진 URL (티스토리에 먼저 업로드 후 주소 붙여넣기)</label>
-              <input id="heroImageUrl" type="text" placeholder="비워두면 사진 삽입 자리로 표시됩니다" />
-            </div>
-            <div>
-              <label for="heroCaption">사진 설명 (캡션)</label>
-              <input id="heroCaption" type="text" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="field-group" data-visible-types="intro,info,aeo">
-        <h2>3. 브랜드 신뢰 문장</h2>
-        <div class="field-row">
+        <h2>신뢰를 주는 사진</h2>
+        <div class="field-cols">
           <div>
-            <label for="storySeed">신뢰를 뒷받침하는 한두 문장</label>
-            <textarea id="storySeed" rows="2"></textarea>
+            <label for="heroImageUrl">사진 URL (티스토리에 먼저 업로드 후 주소 붙여넣기)</label>
+            <input id="heroImageUrl" type="text" placeholder="비워두면 사진 삽입 자리로 표시됩니다" />
           </div>
           <div>
-            <label>함께 넣을 이력 (선택한 항목이 문장으로 자동 추가됩니다)</label>
-            <div class="chip-group" id="heritageChips"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- intro-only -->
-      <div class="field-group" data-visible-types="intro">
-        <h2>4. 제품 특징</h2>
-        <label for="features">한 줄에 하나씩 적어주세요</label>
-        <textarea id="features" rows="5"></textarea>
-      </div>
-      <div class="field-group" data-visible-types="intro">
-        <h2>5. 후기 &amp; 인증</h2>
-        <label for="proof">믿을 수 있는 이유 · 후기 · 인증 이력 (한 줄에 하나씩)</label>
-        <textarea id="proof" rows="4"></textarea>
-      </div>
-      <div class="field-group" data-visible-types="intro">
-        <h2>6. 상세 정보</h2>
-        <div class="field-row">
-          <div>
-            <label for="usage">섭취/보관 방법 (한 줄에 하나씩)</label>
-            <textarea id="usage" rows="3"></textarea>
-          </div>
-          <div>
-            <label for="caution">주의사항 (있을 때만 노출됩니다)</label>
-            <input id="caution" type="text" />
-          </div>
-        </div>
-      </div>
-
-      <!-- info-only -->
-      <div class="field-group" data-visible-types="info">
-        <h2>4. 정보 콘텐츠</h2>
-        <div class="field-row">
-          <div>
-            <label for="introLine">도입부 (독자가 공감할 만한 한 줄)</label>
-            <input id="introLine" type="text" />
-          </div>
-          <div>
-            <label for="infoBody">핵심 정보 (소제목은 줄 앞에 "## "을 붙여주세요)</label>
-            <textarea id="infoBody" rows="8" placeholder="## 소제목&#10;설명 문장&#10;&#10;## 다음 소제목&#10;설명 문장"></textarea>
-            <p class="hint">예: <code>## 고사리 손질법</code> 다음 줄에 설명을 적으면 소제목+본문으로 자동 정리됩니다.</p>
-          </div>
-          <div>
-            <label for="summaryLine">한 줄 요약 (글 마지막에 배치)</label>
-            <input id="summaryLine" type="text" />
-          </div>
-        </div>
-      </div>
-
-      <!-- authentic-only -->
-      <div class="field-group" data-visible-types="authentic">
-        <h2>4. 오늘 이야기</h2>
-        <div class="field-row">
-          <div>
-            <label for="dateContext">날짜 · 상황 (짧게)</label>
-            <input id="dateContext" type="text" />
-          </div>
-          <div>
-            <label for="dailyStory">오늘 있었던 일 (줄바꿈으로 문단을 나눠주세요)</label>
-            <textarea id="dailyStory" rows="6"></textarea>
-          </div>
-          <div>
-            <label for="reflection">소소한 다짐 · 느낌 한 줄</label>
-            <input id="reflection" type="text" />
-          </div>
-          <div>
-            <label for="closing">마무리 인사말</label>
-            <input id="closing" type="text" />
-          </div>
-        </div>
-      </div>
-
-      <!-- aeo-only -->
-      <div class="field-group" data-visible-types="aeo">
-        <h2>4. 질문에 바로 답하기</h2>
-        <div class="field-row">
-          <div>
-            <label for="directAnswer">한 줄 직접 답변 (가장 먼저 노출됩니다)</label>
-            <textarea id="directAnswer" rows="2"></textarea>
-          </div>
-          <div>
-            <label for="rationale">근거 · 설명</label>
-            <textarea id="rationale" rows="3"></textarea>
-          </div>
-          <div>
-            <label for="faqBlock">자주 묻는 질문 (Q: / A: 형식, 질문마다 한 줄 띄우기)</label>
-            <textarea id="faqBlock" rows="8" placeholder="Q: 질문&#10;A: 답변&#10;&#10;Q: 다음 질문&#10;A: 답변"></textarea>
-          </div>
-          <div>
-            <label for="keyFacts">핵심 요약 (라벨: 값, 한 줄에 하나씩)</label>
-            <textarea id="keyFacts" rows="4" placeholder="원재료: 국산 대추 100%&#10;보관: 서늘하고 건조한 곳"></textarea>
+            <label for="heroCaption">사진 설명 (캡션)</label>
+            <input id="heroCaption" type="text" />
           </div>
         </div>
       </div>
 
       <div class="field-group">
-        <h2>7. 자연스러운 안내 (선택)</h2>
+        <h2>자연스러운 안내 (선택 — 링크가 필요할 때만 채워주세요)</h2>
         <div class="field-cols">
           <div>
             <label for="ctaText">버튼 문구 (비워두면 표시하지 않습니다)</label>
             <input id="ctaText" type="text" />
           </div>
           <div>
-            <label for="storeUrl">스마트스토어 · 쿠팡 링크</label>
+            <label for="storeUrl">스마트스토어 · 쿠팡 링크 (선택)</label>
             <input id="storeUrl" type="text" placeholder="https://smartstore.naver.com/..." />
           </div>
         </div>
       </div>
 
       <div class="field-group">
-        <h2>8. 태그 &amp; 검색 노출</h2>
+        <h2>태그 &amp; 검색 노출</h2>
         <div class="field-row">
           <div>
             <label for="hashtags">해시태그 (공백으로 구분)</label>
@@ -434,25 +509,27 @@
     </ul>
   </div>
 
-  <footer class="meta-note">이 도구는 입력한 내용을 그대로 정해진 구조에 넣어 HTML을 만듭니다. 문장은 자동으로 지어내지 않으니, 실제 있었던 이야기와 근거만 적어주세요. 현재는 완성된 HTML을 복사해서 붙여넣는 방식이며, 티스토리 자동 발행(API 연동)은 별도 서버가 필요한 다음 단계입니다.</footer>
+  <footer class="meta-note">이 도구는 API 키나 서버 없이, 브라우저 안에서만 동작합니다(비용 없음). "방법 1"은 무료 AI 챗(ChatGPT·Claude.ai)에서 실제 글쓰기를 한 번 거쳐야 하고, "방법 2"는 외부 AI 없이 항목만 채우면 바로 완성됩니다.</footer>
 </div>
 
 <script>
 (function(){
   "use strict";
 
-  var STORAGE_KEY = "teoju-posting-builder-v2";
+  var STORAGE_KEY = "teoju-posting-builder-v3";
 
-  var FIELD_IDS = [
-    "postType","category","productName","keyword","hook",
-    "heroImageUrl","heroCaption",
-    "storySeed",
+  var SHARED_FIELD_IDS = [
+    "postType","category","heroImageUrl","heroCaption","ctaText","storeUrl","hashtags","metaDesc"
+  ];
+  var DRAFT_FIELD_IDS = ["title","draftText","pasteResult"];
+  var MANUAL_FIELD_IDS = [
+    "productName","keyword","hook","storySeed",
     "features","proof","usage","caution",
     "introLine","infoBody","summaryLine",
     "dateContext","dailyStory","reflection","closing",
-    "directAnswer","rationale","faqBlock","keyFacts",
-    "ctaText","storeUrl","hashtags","metaDesc"
+    "directAnswer","rationale","faqBlock","keyFacts"
   ];
+  var ALL_FIELD_IDS = SHARED_FIELD_IDS.concat(DRAFT_FIELD_IDS, MANUAL_FIELD_IDS);
 
   var HERITAGE_LIB = [
     {id:"years26", label:"26년 도매 업력", text:"터주농산은 26년째 대추와 건나물을 다뤄온 도매업의 노하우를 그대로 잇고 있습니다."},
@@ -463,23 +540,24 @@
     {id:"succession", label:"가업 승계", text:"이제 그 노하우를 이어받아, 도매를 넘어 생산까지 준비하고 있습니다."}
   ];
 
+  var TYPE_LABELS = {
+    intro: "제품 소개형", info: "정보 전달형", authentic: "진정성 일상형", aeo: "AI 답변 최적화형(AEO·GEO)"
+  };
   var TYPE_HINTS = {
-    intro: "제품을 처음 보는 사람에게 신뢰를 주고 구매까지 이어지게 하는 글입니다. (사진 → 스토리 → 제품 → 후기/인증 → 구매유도)",
-    info: "판매보다 정확한 정보 전달이 목적인 글입니다. 검색 노출과 신뢰 축적에 유리합니다. (도입 → 핵심 정보 → 요약)",
+    intro: "제품을 처음 보는 사람에게 신뢰를 주고 구매까지 이어지게 하는 글입니다.",
+    info: "판매보다 정확한 정보 전달이 목적인 글입니다. 검색 노출과 신뢰 축적에 유리합니다.",
     authentic: "오늘 있었던 일을 그대로 담은 일상형 글입니다. 공감과 신뢰가 목적이며 판매를 강요하지 않습니다.",
-    aeo: "질문에 바로 답하는 구조로, ChatGPT·퍼플렉시티 같은 AI 답변 엔진이 인용하기 쉽게 만든 글입니다. (직접 답변 → 근거 → FAQ → 핵심 요약)"
+    aeo: "질문에 바로 답하는 구조로, ChatGPT·퍼플렉시티 같은 AI 답변 엔진이 인용하기 쉽게 만든 글입니다."
+  };
+  var PROMPT_STRUCTURE = {
+    intro: "구조: (1) 사진 한 장으로 신뢰를 주는 도입 → (2) 브랜드 스토리 한 단락 → (3) ## 제품 특징(목록) → (4) ## 믿을 수 있는 이유(후기·인증) → (5) ## 섭취/보관 방법 → (6) 자연스러운 구매 안내 한 줄. 과장 광고 문구 없이 담백하게 써줘.",
+    info: "구조: (1) 독자가 공감할 도입 한두 문장 → (2) ## 소제목으로 나눈 핵심 정보 2~4개 → (3) 마지막에 한 줄 요약. 판매보다 정확한 정보 전달이 우선이며, 확인되지 않은 효능·의학적 효과는 쓰지 마.",
+    authentic: "구조: (1) 오늘 상황을 짧게 소개 → (2) 있었던 일을 자연스러운 문단으로 서술 → (3) 소소한 다짐이나 느낌 한 줄(**굵게** 표시) → (4) 마무리 인사. 판매를 강요하지 말고 담백하게 써줘.",
+    aeo: "구조: (1) 질문에 대한 한 줄 직접 답변을 **굵게** 표시해 맨 앞에 → (2) 근거 설명 한 단락 → (3) Q: / A: 형식의 자주 묻는 질문 3개 → (4) 핵심 사실을 - 목록으로 정리. ChatGPT·퍼플렉시티 같은 AI 검색엔진이 그대로 인용하기 쉽도록 문장을 짧고 단정적으로 써줘."
   };
 
-  var HOOK_LABELS = {
-    intro: "한 줄 후킹 문구 (부제)",
-    info: "질문형 제목 (독자가 검색할 법한 문장)",
-    authentic: "오늘의 제목 (날짜·상황을 담은 한 줄)",
-    aeo: "질문형 제목 (AI가 답할 법한 질문 그대로)"
-  };
-
-  // TYPE_PRESETS[postType][category] — 각 유형·카테고리 조합의 예시 문구
+  // MANUAL 모드 전용 예시 문구 (유형·카테고리별)
   var TYPE_PRESETS = {
-
     intro: {
       chip: {
         productName:"국산 대추칩", keyword:"대추칩", hook:"아이 간식으로도 안심하고 건네는 국산 대추칩",
@@ -535,7 +613,6 @@
       },
       custom: {}
     },
-
     info: {
       chip: {
         productName:"국산 대추칩", keyword:"대추칩", hook:"대추칩, 설탕 없이도 달콤한 이유",
@@ -555,7 +632,7 @@
         storySeed:"26년째 대추를 다뤄온 터주농산이 직접 달여보며 확인한 내용입니다.",
         heritage:["years26","onsite"],
         introLine:"대추차와 대추씨즙을 같은 걸로 생각하는 분들이 많지만, 만드는 부위와 방식이 다릅니다.",
-        infoBody:"## 대추살과 대추씨, 다린 부위가 다릅니다\n대추차는 보통 대추 과육 위주로 우려내지만, 대추씨즙은 씨까지 오랜 시간 함께 달여 더 깊은 맛이 납니다.\n\n## 오래 달일수록 진해지는 이유\n장시간 저온으로 달이면 성분이 천천히 우러나며 색과 맛이 진해집니다. 시간을 줄이면 연하고 밍밍한 맛이 됩니다.\n\n## 언제 마시면 좋을까\n따뜻하게 데워 자기 전 한 잔 마시는 습관으로 찾는 분들이 많습니다. 다만 개인차가 있으니 본인 컨디션에 맞게 섭취량을 조절하세요.",
+        infoBody:"## 대추살과 대추씨, 다린 부위가 다릅니다\n대추차는 보통 대추 과육 위주로 우려내지만, 대추씨즙은 씨까지 오랜 시간 함께 달여 더 깊은 맛이 납니다.\n\n## 오래 달일수록 진해지는 이유\n장시간 저온으로 달이면 성분이 천천히 우러나며 색과 맛이 진해집니다.\n\n## 언제 마시면 좋을까\n따뜻하게 데워 자기 전 한 잔 마시는 습관으로 찾는 분들이 많습니다. 다만 개인차가 있으니 본인 컨디션에 맞게 섭취량을 조절하세요.",
         summaryLine:"대추씨즙은 대추차보다 오래, 씨까지 함께 달인 진한 차입니다 — 자기 전 습관처럼 마시기 좋습니다.",
         ctaText:"", storeUrl:"",
         hashtags:"#대추씨즙 #대추차 #수면차 #터주농산",
@@ -579,7 +656,7 @@
         storySeed:"26년째 농산물을 다뤄온 터주농산이 알려드리는 선물 고르는 기준입니다.",
         heritage:["years26","cheongwadae"],
         introLine:"명절 선물은 받는 사람이 바로 못 먹는 경우가 많아, 보관 기간이 의외로 중요한 기준입니다.",
-        infoBody:"## 건조 농산물이 선물로 좋은 이유\n대추칩, 건나물처럼 건조된 상품은 냉장 보관 없이도 상온에서 오래 보관할 수 있어 선물용으로 부담이 적습니다.\n\n## 확인해야 할 표기 사항\n원산지, 제조일자, 소비기한이 포장에 명확히 표기되어 있는지 확인하세요.\n\n## 세트 구성 고르는 법\n받는 분의 가족 구성(아이가 있는지, 나물 요리를 자주 하는지)에 따라 구성 품목을 다르게 고르면 만족도가 높습니다.",
+        infoBody:"## 건조 농산물이 선물로 좋은 이유\n대추칩, 건나물처럼 건조된 상품은 냉장 보관 없이도 상온에서 오래 보관할 수 있어 선물용으로 부담이 적습니다.\n\n## 확인해야 할 표기 사항\n원산지, 제조일자, 소비기한이 포장에 명확히 표기되어 있는지 확인하세요.\n\n## 세트 구성 고르는 법\n받는 분의 가족 구성에 따라 구성 품목을 다르게 고르면 만족도가 높습니다.",
         summaryLine:"명절 선물은 보관이 쉬운 건조 농산물, 표기 사항이 명확한 상품을 고르는 게 기본입니다.",
         ctaText:"", storeUrl:"",
         hashtags:"#명절선물 #추석선물고르는법 #설선물 #터주농산",
@@ -587,7 +664,6 @@
       },
       custom: {}
     },
-
     authentic: {
       chip: {
         productName:"국산 대추칩", keyword:"대추칩", hook:"대추칩 말리던 날, 아이가 옆에서 집어먹었습니다",
@@ -635,7 +711,6 @@
       },
       custom: {}
     },
-
     aeo: {
       chip: {
         productName:"국산 대추칩", keyword:"대추칩", hook:"대추칩은 아이가 먹어도 되나요?",
@@ -694,13 +769,20 @@
   };
 
   var els = {};
-  FIELD_IDS.forEach(function(id){ els[id] = document.getElementById(id); });
+  ALL_FIELD_IDS.forEach(function(id){ els[id] = document.getElementById(id); });
   var heritageChipsEl = document.getElementById("heritageChips");
   var previewFrame = document.getElementById("previewFrame");
   var htmlOut = document.getElementById("htmlOut");
   var metaOut = document.getElementById("metaOut");
+  var promptOut = document.getElementById("promptOut");
   var hookLabel = document.getElementById("hookLabel");
   var typeHint = document.getElementById("typeHint");
+  var modeBtnDraft = document.getElementById("modeBtnDraft");
+  var modeBtnManual = document.getElementById("modeBtnManual");
+  var modeDraftEl = document.getElementById("modeDraft");
+  var modeManualEl = document.getElementById("modeManual");
+
+  var currentMode = "draft";
 
   function escapeHtml(s){
     return String(s == null ? "" : s)
@@ -740,7 +822,68 @@
     });
   }
 
-  // build heritage chips
+  // 마크다운 라이트 -> HTML (AI가 붙여넣은 텍스트 파싱용)
+  function inlineFmt(s){
+    var esc = escapeHtml(s);
+    return esc.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  }
+  function mdToHtml(text){
+    var lines = String(text || "").replace(/\r\n/g,"\n").split("\n");
+    var out = []; var listBuf = []; var paraBuf = [];
+    function flushList(){
+      if(listBuf.length){ out.push('<ul style="margin:0 0 20px;padding-left:20px;">' + listBuf.join("") + '</ul>'); listBuf = []; }
+    }
+    function flushPara(){
+      if(!paraBuf.length) return;
+      var joined = paraBuf.join(" ").trim();
+      paraBuf = [];
+      if(!joined) return;
+      var boldOnly = joined.match(/^\*\*(.+)\*\*$/);
+      if(boldOnly){
+        out.push('<div style="background:#e3eedd;border:1px solid #2f6b3c;border-radius:14px;padding:18px 22px;margin:0 0 22px;">' +
+          '<p style="margin:0;font-weight:700;color:#204a29;font-size:16px;">' + escapeHtml(boldOnly[1]) + '</p></div>');
+      } else {
+        out.push('<p style="margin:0 0 20px;">' + inlineFmt(joined) + '</p>');
+      }
+    }
+    var i = 0;
+    while(i < lines.length){
+      var line = lines[i];
+      var h = line.match(/^(#{1,3})\s+(.*)/);
+      var li = line.match(/^[-*]\s+(.*)/);
+      var q = line.match(/^Q\s*[:：]\s*(.*)/i);
+      if(h){
+        flushPara(); flushList();
+        var level = h[1].length;
+        var tag = level <= 2 ? "h2" : "h3";
+        var size = level <= 2 ? "18px" : "15px";
+        out.push('<' + tag + ' style="font-family:\'Noto Serif KR\',serif;font-size:' + size + ';color:#204a29;margin:22px 0 12px;">' + escapeHtml(h[2]) + '</' + tag + '>');
+        i++; continue;
+      }
+      if(q){
+        flushPara(); flushList();
+        var a = lines[i+1] && lines[i+1].match(/^A\s*[:：]\s*(.*)/i);
+        out.push('<h3 style="font-size:15px;color:#2f6b3c;margin:0 0 6px;">Q. ' + escapeHtml(q[1]) + '</h3>');
+        if(a){ out.push('<p style="margin:0 0 18px;">' + inlineFmt(a[1]) + '</p>'); i += 2; } else { i++; }
+        continue;
+      }
+      if(li){
+        flushPara();
+        listBuf.push('<li style="margin:0 0 8px;">' + inlineFmt(li[1]) + '</li>');
+        i++; continue;
+      }
+      if(line.trim() === ""){
+        flushPara(); flushList();
+        i++; continue;
+      }
+      paraBuf.push(line.trim());
+      i++;
+    }
+    flushPara(); flushList();
+    return out.join("\n");
+  }
+
+  // heritage chips
   HERITAGE_LIB.forEach(function(item){
     var label = document.createElement("label");
     label.className = "chip";
@@ -758,7 +901,6 @@
       render();
     });
   });
-
   function getHeritageChecked(){
     return Array.prototype.slice.call(heritageChipsEl.querySelectorAll("input:checked")).map(function(i){return i.value;});
   }
@@ -777,41 +919,54 @@
     }).filter(Boolean);
   }
 
-  function applyPreset(type, category){
+  function applyManualPreset(type, category){
     var p = (TYPE_PRESETS[type] && TYPE_PRESETS[type][category]) || {};
-    FIELD_IDS.forEach(function(id){
-      if(id === "postType" || id === "category") return;
+    MANUAL_FIELD_IDS.concat(["heroCaption","ctaText","storeUrl","hashtags","metaDesc"]).forEach(function(id){
       if(!els[id]) return;
-      els[id].value = typeof p[id] === "string" ? p[id] : "";
+      els[id].value = typeof p[id] === "string" ? p[id] : (els[id].value && SHARED_FIELD_IDS.indexOf(id) !== -1 ? els[id].value : "");
     });
     setHeritageChecked(p.heritage || []);
+  }
+
+  function setMode(mode){
+    currentMode = mode;
+    modeDraftEl.hidden = mode !== "draft";
+    modeManualEl.hidden = mode !== "manual";
+    modeBtnDraft.classList.toggle("active", mode === "draft");
+    modeBtnManual.classList.toggle("active", mode === "manual");
+    updateFieldVisibility();
   }
 
   function updateFieldVisibility(){
     var t = els.postType.value;
     document.querySelectorAll("[data-visible-types]").forEach(function(el){
+      if(currentMode !== "manual"){ el.hidden = true; return; }
       var types = el.dataset.visibleTypes.split(",");
       el.hidden = types.indexOf(t) === -1;
     });
-    hookLabel.textContent = HOOK_LABELS[t] || HOOK_LABELS.intro;
+    if(currentMode === "manual" && hookLabel){
+      var HOOK_LABELS = {
+        intro: "한 줄 후킹 문구 (부제)", info: "질문형 제목 (독자가 검색할 법한 문장)",
+        authentic: "오늘의 제목 (날짜·상황을 담은 한 줄)", aeo: "질문형 제목 (AI가 답할 법한 질문 그대로)"
+      };
+      hookLabel.textContent = HOOK_LABELS[t] || HOOK_LABELS.intro;
+    }
     typeHint.textContent = TYPE_HINTS[t] || "";
   }
 
   function heroBlock(data){
     if(data.heroImageUrl){
       return '<div style="text-align:center;margin:0 0 8px;">' +
-        '<img src="' + escapeHtml(data.heroImageUrl) + '" alt="' + escapeHtml(data.heroCaption || data.productName) + '" style="width:100%;max-width:680px;border-radius:14px;display:block;margin:0 auto;" />' +
+        '<img src="' + escapeHtml(data.heroImageUrl) + '" alt="' + escapeHtml(data.heroCaption || data.productName || "") + '" style="width:100%;max-width:680px;border-radius:14px;display:block;margin:0 auto;" />' +
         '</div>';
     }
     return '<div style="border:2px dashed #c9d6bf;border-radius:14px;background:#f2f6ee;color:#5b6b57;' +
       'text-align:center;padding:56px 16px;font-size:14px;margin:0 0 8px;">' +
       '📷 사진 삽입 위치 — ' + escapeHtml(data.heroCaption || "신뢰를 주는 사진 한 장") + '</div>';
   }
-
   function heroCaptionLine(data){
     return data.heroCaption ? '<p style="text-align:center;font-size:13px;color:#5b6b57;margin:0 0 26px;">' + escapeHtml(data.heroCaption) + '</p>\n' : "";
   }
-
   function ctaBlock(data){
     if(!data.ctaText) return "";
     var ctaInner = escapeHtml(data.ctaText) + ' →';
@@ -821,12 +976,10 @@
       : '<span style="display:inline-block;background:#2f6b3c;color:#fff;padding:14px 30px;border-radius:999px;font-weight:700;font-size:15px;">' + ctaInner + '</span>';
     return '<div style="text-align:center;margin:34px 0 22px;">' + inner + '</div>\n';
   }
-
   function hashtagLine(data){
     var line = String(data.hashtags||"").split(/\s+/).filter(Boolean).map(escapeHtml).join(" ");
     return line ? '<p style="color:#5b6b57;font-size:14px;margin:0;">' + line + '</p>\n' : "";
   }
-
   function wrapOpen(){
     return '<div style="font-family:\'Noto Sans KR\',sans-serif;color:#22301f;line-height:1.85;max-width:720px;margin:0 auto;">\n';
   }
@@ -834,29 +987,61 @@
     return '  <h1 style="font-family:\'Noto Serif KR\',serif;font-size:25px;line-height:1.4;color:#204a29;margin:0 0 18px;">' + title + '</h1>\n';
   }
 
-  // ---------- 제품 소개형 ----------
+  // ---------- 방법 1: AI가 써준 글 조립 ----------
+  function buildFromDraft(data){
+    var title = escapeHtml(data.title || "터주농산 이야기");
+    var body = mdToHtml(data.pasteResult);
+    var html = wrapOpen();
+    html += titleBlock(title);
+    html += '  ' + heroBlock(data) + '\n';
+    html += '  ' + heroCaptionLine(data);
+    html += body ? ('\n' + body + '\n') : '  <p style="color:#5b6b57;">3번 칸에 AI가 써준 글을 붙여넣으면 여기에 완성된 글이 표시됩니다.</p>\n';
+    html += '  ' + ctaBlock(data);
+    html += '  ' + hashtagLine(data);
+    html += '</div>';
+    return html;
+  }
+
+  function buildPrompt(data){
+    var lines = [];
+    lines.push("너는 터주농산의 티스토리 블로그를 쓰는 카피라이터야.");
+    lines.push("브랜드: 26년째 대추·건나물 도매를 해온 가족 경영 농산물 브랜드. 지금은 도매를 넘어 생산까지 준비 중이야.");
+    lines.push("톤: 과장 광고 문구 없이 담백하고 진정성 있게. 확인 안 된 효능·의학적 효과는 쓰지 마.");
+    lines.push("");
+    lines.push("[오늘 글 정보]");
+    if(data.title) lines.push("제목(참고용, 더 나은 제목이 있으면 바꿔도 됨): " + data.title);
+    lines.push("상품 카테고리: " + (CATEGORY_LABELS[data.category] || "해당 없음"));
+    lines.push("글 유형: " + (TYPE_LABELS[data.postType] || "제품 소개형"));
+    lines.push(PROMPT_STRUCTURE[data.postType] || PROMPT_STRUCTURE.intro);
+    lines.push("");
+    lines.push("[검색·AI 답변엔진(AEO·GEO) 노출 원칙]");
+    lines.push("- 핵심 정보는 앞쪽에 배치하고, 문장은 짧고 명확하게 써줘.");
+    lines.push("- 소제목은 ##, 강조는 **굵게**, 목록은 - 로 표시해줘(마크다운 형식).");
+    lines.push("- 사진 위치는 신경 쓰지 마. 텍스트만 써주면 사진은 내가 따로 넣을게.");
+    lines.push("- 분량은 800~1200자 내외로 써줘.");
+    lines.push("");
+    lines.push("[대표님이 오늘 남긴 메모 — 내용을 지어내지 말고 이 메모를 살려서 다시 써줘]");
+    lines.push(data.draftText || "(1번 칸에 오늘 하고 싶은 이야기를 적어주세요)");
+    return lines.join("\n");
+  }
+  var CATEGORY_LABELS = {chip:"대추칩", juice:"대추씨즙", herb:"국산 건나물", gift:"명절 선물세트", custom:"기타"};
+
+  // ---------- 방법 2: 항목별 직접 조립 ----------
   function buildIntro(data){
     var heritage = heritageSentences();
     var titleKeyword = data.keyword || data.productName || "터주농산";
     var title = escapeHtml((titleKeyword ? titleKeyword + " · " : "") + (data.hook || data.productName || "터주농산 이야기"));
-
     var storyParas = [];
     if(data.storySeed) storyParas.push('<p style="margin:0 0 10px;">' + escapeHtml(data.storySeed) + '</p>');
     if(heritage.length) storyParas.push('<p style="margin:0;">' + heritage.map(escapeHtml).join(' ') + '</p>');
-
-    var featureItems = linesOf(data.features).map(function(l){
-      return '<li style="margin:0 0 8px;">' + escapeHtml(l) + '</li>';
-    }).join("");
+    var featureItems = linesOf(data.features).map(function(l){ return '<li style="margin:0 0 8px;">' + escapeHtml(l) + '</li>'; }).join("");
     var proofItems = linesOf(data.proof).map(function(l){
       return '<li style="margin:0 0 10px;list-style:none;padding-left:26px;position:relative;">' +
         '<span style="position:absolute;left:0;top:1px;">🏅</span>' + escapeHtml(l) + '</li>';
     }).join("");
-    var usageItems = linesOf(data.usage).map(function(l){
-      return '<p style="margin:0 0 6px;">' + escapeHtml(l) + '</p>';
-    }).join("");
+    var usageItems = linesOf(data.usage).map(function(l){ return '<p style="margin:0 0 6px;">' + escapeHtml(l) + '</p>'; }).join("");
     var cautionBlock = data.caution ? (
-      '<p style="margin:14px 0 0;background:#fbf1d9;color:#7a5a06;border-radius:8px;padding:10px 14px;font-size:13.5px;">' +
-      '⚠️ ' + escapeHtml(data.caution) + '</p>'
+      '<p style="margin:14px 0 0;background:#fbf1d9;color:#7a5a06;border-radius:8px;padding:10px 14px;font-size:13.5px;">⚠️ ' + escapeHtml(data.caution) + '</p>'
     ) : "";
 
     var html = wrapOpen();
@@ -886,25 +1071,18 @@
     html += '</div>';
     return html;
   }
-
-  // ---------- 정보 전달형 ----------
   function buildInfo(data){
     var heritage = heritageSentences();
     var title = escapeHtml(data.hook || data.productName || "터주농산 정보");
     var sections = parseSections(data.infoBody);
-
     var html = wrapOpen();
     html += titleBlock(title);
     html += '  ' + heroBlock(data) + '\n';
     html += '  ' + heroCaptionLine(data);
-    if(data.introLine){
-      html += '  <p style="font-size:15.5px;margin:0 0 26px;">' + escapeHtml(data.introLine) + '</p>\n';
-    }
+    if(data.introLine) html += '  <p style="font-size:15.5px;margin:0 0 26px;">' + escapeHtml(data.introLine) + '</p>\n';
     sections.forEach(function(sec){
       html += '  <h2 style="font-family:\'Noto Serif KR\',serif;font-size:18px;color:#204a29;margin:0 0 10px;">' + escapeHtml(sec.heading) + '</h2>\n';
-      sec.body.forEach(function(p){
-        html += '  <p style="margin:0 0 20px;">' + escapeHtml(p) + '</p>\n';
-      });
+      sec.body.forEach(function(p){ html += '  <p style="margin:0 0 20px;">' + escapeHtml(p) + '</p>\n'; });
     });
     if(data.summaryLine){
       html += '  <div style="background:#e3eedd;border-radius:14px;padding:18px 22px;margin:8px 0 28px;">\n';
@@ -920,11 +1098,8 @@
     html += '</div>';
     return html;
   }
-
-  // ---------- 진정성 일상형 ----------
   function buildAuthentic(data){
     var title = escapeHtml(data.hook || "터주농산 이야기");
-
     var html = wrapOpen();
     if(data.dateContext){
       html += '  <p style="font-size:12.5px;color:#a5761f;font-weight:700;letter-spacing:.03em;margin:0 0 8px;">' + escapeHtml(data.dateContext) + '</p>\n';
@@ -932,29 +1107,21 @@
     html += titleBlock(title);
     html += '  ' + heroBlock(data) + '\n';
     html += '  ' + heroCaptionLine(data);
-    paragraphsOf(data.dailyStory).forEach(function(p){
-      html += '  <p style="margin:0 0 18px;">' + escapeHtml(p) + '</p>\n';
-    });
+    paragraphsOf(data.dailyStory).forEach(function(p){ html += '  <p style="margin:0 0 18px;">' + escapeHtml(p) + '</p>\n'; });
     if(data.reflection){
-      html += '  <blockquote style="margin:0 0 26px;padding:16px 20px;background:#f8eed7;border-left:4px solid #a5761f;border-radius:0 10px 10px 0;color:#5b4110;font-style:normal;">' +
-        escapeHtml(data.reflection) + '</blockquote>\n';
+      html += '  <blockquote style="margin:0 0 26px;padding:16px 20px;background:#f8eed7;border-left:4px solid #a5761f;border-radius:0 10px 10px 0;color:#5b4110;">' + escapeHtml(data.reflection) + '</blockquote>\n';
     }
-    if(data.closing){
-      html += '  <p style="margin:0 0 20px;">' + escapeHtml(data.closing) + '</p>\n';
-    }
+    if(data.closing) html += '  <p style="margin:0 0 20px;">' + escapeHtml(data.closing) + '</p>\n';
     html += '  ' + ctaBlock(data);
     html += '  ' + hashtagLine(data);
     html += '</div>';
     return html;
   }
-
-  // ---------- AEO·GEO 최적화형 ----------
   function buildAeo(data){
     var heritage = heritageSentences();
     var title = escapeHtml(data.hook || "자주 묻는 질문");
     var faqs = parseFaq(data.faqBlock);
     var facts = parseKeyFacts(data.keyFacts);
-
     var html = wrapOpen();
     html += titleBlock(title);
     if(data.directAnswer){
@@ -964,12 +1131,8 @@
     }
     html += '  ' + heroBlock(data) + '\n';
     html += '  ' + heroCaptionLine(data);
-    if(data.rationale){
-      html += '  <p style="margin:0 0 24px;">' + escapeHtml(data.rationale) + '</p>\n';
-    }
-    if(heritage.length){
-      html += '  <p style="font-size:13px;color:#5b6b57;margin:0 0 26px;">' + heritage.map(escapeHtml).join(' ') + '</p>\n';
-    }
+    if(data.rationale) html += '  <p style="margin:0 0 24px;">' + escapeHtml(data.rationale) + '</p>\n';
+    if(heritage.length) html += '  <p style="font-size:13px;color:#5b6b57;margin:0 0 26px;">' + heritage.map(escapeHtml).join(' ') + '</p>\n';
     if(faqs.length){
       html += '  <h2 style="font-family:\'Noto Serif KR\',serif;font-size:18px;color:#204a29;margin:0 0 12px;">자주 묻는 질문</h2>\n';
       faqs.forEach(function(f){
@@ -981,9 +1144,7 @@
       html += '  <h2 style="font-family:\'Noto Serif KR\',serif;font-size:18px;color:#204a29;margin:24px 0 12px;">핵심 요약</h2>\n';
       html += '  <table style="width:100%;border-collapse:collapse;margin:0 0 26px;font-size:14.5px;">\n';
       facts.forEach(function(f){
-        html += '    <tr style="border-bottom:1px solid #dbe3d1;">' +
-          '<td style="padding:8px 10px 8px 0;color:#5b6b57;white-space:nowrap;vertical-align:top;">' + escapeHtml(f.label) + '</td>' +
-          '<td style="padding:8px 0;">' + escapeHtml(f.value) + '</td></tr>\n';
+        html += '    <tr style="border-bottom:1px solid #dbe3d1;"><td style="padding:8px 10px 8px 0;color:#5b6b57;white-space:nowrap;vertical-align:top;">' + escapeHtml(f.label) + '</td><td style="padding:8px 0;">' + escapeHtml(f.value) + '</td></tr>\n';
       });
       html += '  </table>\n';
     }
@@ -992,8 +1153,7 @@
     html += '</div>';
     return html;
   }
-
-  function buildFragment(data){
+  function buildManual(data){
     switch(data.postType){
       case "info": return buildInfo(data);
       case "authentic": return buildAuthentic(data);
@@ -1004,14 +1164,15 @@
 
   function collectData(){
     var data = {};
-    FIELD_IDS.forEach(function(id){ data[id] = els[id] ? els[id].value : ""; });
+    ALL_FIELD_IDS.forEach(function(id){ data[id] = els[id] ? els[id].value : ""; });
     return data;
   }
 
   function render(){
     updateFieldVisibility();
     var data = collectData();
-    var fragment = buildFragment(data);
+    promptOut.value = buildPrompt(data);
+    var fragment = currentMode === "draft" ? buildFromDraft(data) : buildManual(data);
     htmlOut.value = fragment;
     metaOut.value = data.metaDesc || "";
 
@@ -1025,44 +1186,54 @@
 
   function saveDraft(data){
     try{
-      var toSave = Object.assign({}, data, { heritage: getHeritageChecked() });
+      var toSave = Object.assign({}, data, { heritage: getHeritageChecked(), mode: currentMode });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
     }catch(e){ /* storage unavailable — ignore */ }
   }
-
   function loadDraft(){
     try{
       var raw = localStorage.getItem(STORAGE_KEY);
       if(!raw) return false;
       var data = JSON.parse(raw);
-      FIELD_IDS.forEach(function(id){
+      ALL_FIELD_IDS.forEach(function(id){
         if(els[id] && typeof data[id] === "string") els[id].value = data[id];
       });
       setHeritageChecked(data.heritage || []);
+      if(data.mode === "manual" || data.mode === "draft") currentMode = data.mode;
       return true;
     }catch(e){ return false; }
   }
 
   // wire inputs
-  FIELD_IDS.forEach(function(id){
+  ALL_FIELD_IDS.forEach(function(id){
     var el = els[id];
     if(!el || id === "postType" || id === "category") return;
     el.addEventListener("input", render);
     el.addEventListener("change", render);
   });
-
   els.postType.addEventListener("change", function(){
-    applyPreset(els.postType.value, els.category.value);
+    if(currentMode === "manual") applyManualPreset(els.postType.value, els.category.value);
     render();
   });
   els.category.addEventListener("change", function(){
-    applyPreset(els.postType.value, els.category.value);
+    if(currentMode === "manual") applyManualPreset(els.postType.value, els.category.value);
+    render();
+  });
+
+  modeBtnDraft.addEventListener("click", function(){ setMode("draft"); render(); });
+  modeBtnManual.addEventListener("click", function(){
+    setMode("manual");
+    if(!els.productName.value) applyManualPreset(els.postType.value, els.category.value);
     render();
   });
 
   document.getElementById("resetBtn").addEventListener("click", function(){
-    if(!confirm("입력한 내용을 모두 지우고 현재 글 유형·카테고리의 예시 문구로 되돌릴까요?")) return;
-    applyPreset(els.postType.value, els.category.value);
+    if(!confirm("입력한 내용을 모두 지울까요?")) return;
+    ALL_FIELD_IDS.forEach(function(id){ if(els[id]) els[id].value = ""; });
+    setHeritageChecked([]);
+    els.postType.value = "intro";
+    els.category.value = "chip";
+    if(currentMode === "manual") applyManualPreset("intro", "chip");
     render();
   });
 
@@ -1077,7 +1248,7 @@
   });
 
   function copyText(text, statusEl){
-    function ok(){ statusEl.textContent = "복사했어요. 티스토리 HTML 모드에 붙여넣으세요."; setTimeout(function(){statusEl.textContent="";}, 3000); }
+    function ok(){ statusEl.textContent = "복사했어요."; setTimeout(function(){statusEl.textContent="";}, 3000); }
     function fail(){ statusEl.textContent = "복사에 실패했어요. 텍스트를 직접 선택해 Ctrl+C로 복사해주세요."; }
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(text).then(ok, fail);
@@ -1092,7 +1263,9 @@
       }catch(e){ fail(); }
     }
   }
-
+  document.getElementById("copyPrompt").addEventListener("click", function(){
+    copyText(promptOut.value, document.getElementById("statusPrompt"));
+  });
   document.getElementById("copyHtmlFromPreview").addEventListener("click", function(){
     copyText(htmlOut.value, document.getElementById("statusPreview"));
   });
@@ -1108,8 +1281,9 @@
   if(!restored){
     els.postType.value = "intro";
     els.category.value = "chip";
-    applyPreset("intro", "chip");
+    els.draftText.value = "오늘 대추칩 새로 말렸는데 아이가 옆에서 자꾸 집어먹었다. 설탕 안 넣고 만든 거라 다행이라고 생각했다.";
   }
+  setMode(currentMode);
   render();
 })();
 </script>
